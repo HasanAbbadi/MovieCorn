@@ -84,7 +84,7 @@ function loadMovieDetails(){
 }
 
 async function displayMovieDetails(imdb_id){
-    const result = await fetch(`http://www.omdbapi.com/?i=${imdb_id}&apikey=fc1fef96`);
+    const result = await fetch(`https://www.omdbapi.com/?i=${imdb_id}&apikey=fc1fef96`);
     const details = await result.json();
     resultGrid.innerHTML = `
     <div class = "movie-poster">
