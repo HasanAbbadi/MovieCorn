@@ -1,19 +1,41 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700;800&display=swap');
 
 :root{
     --md-dark-color: #1d1d1d;
     --dark-color: #171717;
     --light-dark-color: #292929;
     --yellow-color: #d4aa11;
+    --text-color: whitesmoke;
 }
+
+
+[data-theme="dark"] {
+    --md-dark-color: #FFFEC8;
+    --dark-color: white;
+    --light-dark-color: #665701;
+    --yellow-color: #F2D736;
+    --text-color: black;
+}
+
+
 *{
     padding: 0;
     margin: 0;
     -webkit-box-sizing: border-box;
             box-sizing: border-box;
 }
+
+h3, span, .language {
+
+          text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+
+}
+
 body{
-    font-family: 'Inter', sans-serif;
+    font-family: 'Lato', sans-serif;
+    color: var(--text-color);
+
 }
 a{
     text-decoration: none;
@@ -33,7 +55,7 @@ img{
 }
 .search-container{
     background-color: var(--md-dark-color);
-    height: 180px;
+    height: 80px;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -47,14 +69,86 @@ img{
 .logo{
     padding: 1rem 0;
     border-bottom: 1px solid var(--light-dark-color);
+    display: flex;
 }
 .logo p{
     font-size: 2rem;
-    color: #fff;
+    color: var(--text-color)
     font-weight: bold;
 }
 .logo p span{
     color: var(--yellow-color);
+}
+
+
+/*Simple css to style it like a toggle switch*/
+.theme-switch-wrapper {
+  display: flex;
+  align-items: center;
+
+  em {
+    margin-left: 10px;
+    font-size: 1rem;
+  }
+}
+.theme-switch {
+  display: inline-block;
+  height: 34px;
+  position: relative;
+  width: 60px;
+}
+
+.theme-switch input {
+  display:none;
+}
+
+.slider {
+  background-color: #ccc;
+  bottom: 0;
+  cursor: pointer;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: .4s;
+}
+
+.slider:before {
+  background-color: #fff;
+  bottom: 4px;
+  content: "";
+  height: 26px;
+  left: 4px;
+  position: absolute;
+  transition: .4s;
+  width: 26px;
+}
+
+input:checked + .slider {
+  background-color: var(--yellow-color);
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+
+
+
+#logo-container {
+    display: flex;
+}
+
+#logo-container img {
+    max-width: 50px;
 }
 .search-element{
     display: -webkit-box;
@@ -77,19 +171,19 @@ img{
         align-self: center;
     margin-right: 1rem;
     font-size: 2rem;
-    color: #fff;
+    color: var(--text-color)
     font-weight: 500;
     margin-bottom: 1.5rem;
 }
 .search-element .form-control{
     padding: 1rem 2rem;
-    font-size: 1.4rem;
+    font-size: 1.0rem;
     border: none;
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px;
+    border-radius: 10px 10px 0px 0px;
     outline: none;
-    color: var(--light-dark-color);
+    color: var(--text-color);
     width: 350px;
+    background-color: var(--dark-color);
 }
 .search-list{
     position: absolute;
@@ -98,13 +192,14 @@ img{
     max-height: 500px;
     overflow-y: scroll;
     z-index: 10;
+    border-radius: 0px 0px 10px 10px;
 }
 .search-list .search-list-item{
     background-color: var(--light-dark-color);
     padding: 0.5rem;
     border-bottom: 1px solid var(--dark-color);
     width: calc(350px - 8px);
-    color: #fff;
+    color: var(--text-color)
     cursor: pointer;
     -webkit-transition: background-color 200ms ease;
     -o-transition: background-color 200ms ease;
@@ -157,16 +252,16 @@ img{
 
 /* movie result */
 .result-container{
-    padding: 3rem 0;
+    padding: 1.5rem 0;
 }
 .movie-poster img{
     max-width: 300px;
     margin: 0 auto;
-    border: 4px solid #fff;
+    border-radius: 10px 10px;
 }
 .movie-info{
     text-align: center;
-    color: #fff;
+    color: var(--text-color)
     padding-top: 3rem;
 }
 
@@ -229,17 +324,64 @@ img{
     margin: 1rem 0.7rem 0 0;
 }
 
-@media(max-width: 450px){
+#watch-grid {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 20px;
+}
+
+#watch-grid * {
+  padding: 5px 20px;
+  font-size: 1rem;
+  border: 1px;
+  border-radius: 10px 10px;
+  margin: 5px 10px 5px 0px;
+}
+
+#watch-grid button {
+    background-color: var(--yellow-color);
+    color: var(--dark-color);
+    cursor: pointer;
+}
+
+#watch-grid button:hover {
+    background-color: var(--light-dark-color);
+    color: var(--yellow-color);
+}
+
+#watch-grid button:active {
+    color: black
+}
+
+#watch-grid select {
+  background: var(--light-dark-color);
+  color: var(--yellow-color);
+
+}
+
+#episodes_selector {
+  max-width: 250px;
+}
+
+#watch-grid option:checked {
+    background-color: var(--yellow-color);
+    color: var(--dark-color)
+}
+
+
+@media(max-width: 500px){
     .logo p{
         font-size: 1.4rem;
+    }
+    
+    .search-element {
+        width: 80%;
     }
     .search-element .form-control{
         width: 90%;
         margin: 0 auto;
         padding: 0.5rem 1rem;
-    }
-    .search-element h3{
-        font-size: 1.4rem;
     }
     .search-list{
         width: 90%;
@@ -251,19 +393,37 @@ img{
     .search-list .search-list-item{
         width: 100%;
     }
+    
+    .movie-info {
+        margin-top: -10%;
+    }
+    
     .movie-misc-info{
-        -webkit-box-orient: vertical;
-        -webkit-box-direction: normal;
-            -ms-flex-direction: column;
-                flex-direction: column;
+        justify-content: space-around;
     }
     .movie-misc-info li:nth-child(2){
         margin: 0.8rem 0;
     }
+    
+    .movie-poster img {
+        -webkit-mask-image: linear-gradient(black, transparent);
+    }
+    
+    #watch-grid {
+        flex-direction: column;
+
+    }
+}
+
+@media(max-width: 800px){
+    
+    #watch-grid {
+            justify-content: center;
+            }
 }
 
 @media(min-width: 800px){
-    .search-element{
+    .search-element {
         -webkit-box-orient: horizontal;
         -webkit-box-direction: normal;
             -ms-flex-direction: row;
@@ -293,4 +453,5 @@ img{
         padding-left: 0;
         margin-left: 0;
     }
+
 }

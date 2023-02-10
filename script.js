@@ -4,9 +4,9 @@
 const movieSearchBox = document.getElementById('movie-search-box');
 const searchList = document.getElementById('search-list');
 const resultGrid = document.getElementById('result-grid');
-const watchGrid = document.getElementById('watch-grid');
 const videoGrid = document.getElementById('video-grid');
 const consumetapi = "https://api.consumet.org/movies/flixhq"
+let watchGrid;
 
 function findGetParameter(parameterName) {
     var result = null,
@@ -23,6 +23,22 @@ function findGetParameter(parameterName) {
 
 const imdb_id = findGetParameter("id");
 displayMovieDetails(imdb_id)
+
+
+
+const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+
+function switchTheme(e) {
+    if (e.target.checked) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+    else {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }    
+}
+
+toggleSwitch.addEventListener('change', switchTheme, false);
+
 
 // load movies from API
 async function loadMovies(searchTerm){
@@ -84,7 +100,7 @@ function loadMovieDetails(){
 }
 
 async function displayMovieDetails(imdb_id){
-    const result = await fetch(`https://www.omdbapi.com/?i=${imdb_id}&apikey=fc1fef96`);
+    const result = await fetch(`http://www.omdbapi.com/?i=${imdb_id}&apikey=fc1fef96`);
     const details = await result.json();
     resultGrid.innerHTML = `
     <div class = "movie-poster">
@@ -103,9 +119,12 @@ async function displayMovieDetails(imdb_id){
         <p class = "plot"><b>Plot:</b> ${details.Plot}</p>
         <p class = "language"><b>Language:</b> ${details.Language}</p>
         <p class = "awards"><b><i class = "fas fa-award"></i></b> ${details.Awards}</p>
+        <div class="watch-grid" id="watch-grid"></div>
     </div>
     `;
-    
+   
+    watchGrid = document.getElementById('watch-grid');
+
     if (details.Type == "movie"){
       watchGrid.innerHTML = `
         <button id="watch-movie">Watch</button>
@@ -156,7 +175,6 @@ async function watch_series(title) {
     season_select.name = "Seasons";
     season_select.id = "seasons-selector"
     
-
     
     for (var i = 0; i < seasons; i++){
         var option = document.createElement("option");
@@ -225,14 +243,19 @@ async function display_video(episodeId, mediaId) {
     
             
     let captions = []
-    for(let i = 0; i < 5; i++) {
+    let languages = ["Arabic", "Spanish", "English", "German"]
+    for(let i = 0; i < json.subtitles.length; i++) {
+    
+    
     let caption = json.subtitles[i];
+    console.log(languages.find((x) => caption.lang.startsWith(x)))
+    if (languages.find((x) => caption.lang.startsWith(x))){
         captions.push({
           src: caption.url,
           kind: "captions",
           label: caption.lang,
         })
-    }
+    }}
     
     console.log(captions)
     let options = {
