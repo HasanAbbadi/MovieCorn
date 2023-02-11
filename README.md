@@ -1,4 +1,5 @@
-# MovieCorn
+<h1>🌽 MovieCorn</h1>
+
 **⚠️ Warning: This site doesn't host any videos. If you have any legal issues with the videos, contact the original sources.**
 
 Streaming Site with no Ads.
