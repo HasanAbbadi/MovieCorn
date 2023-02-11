@@ -22,11 +22,23 @@ function findGetParameter(parameterName) {
 }
 
 const imdb_id = findGetParameter("id");
-displayMovieDetails(imdb_id)
+if (imdb_id != null) {
+  displayMovieDetails(imdb_id)
+}
+
 
 
 
 const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+    function switchTheme(e) {
+    if (e.target.checked) {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }   
+    else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }    
+      }
+toggleSwitch.addEventListener('change', switchTheme, false);
 
 
 function LightenDarkenColor(color, amount) {
@@ -263,7 +275,7 @@ async function watch_series(title) {
 async function display_video(episodeId, mediaId) {
     const watchLink = await fetch(`${consumetapi}/watch?episodeId=${episodeId}&mediaId=${mediaId}&source=vidsrc`)
     const json = await watchLink.json()
-    videoGrid.innerHTML = '<video id="video_1" class="video-js vjs-default-skin" controls></video>'
+    videoGrid.innerHTML = '<video id="video_1" class="video-js vjs-matrix" data-setup="{}"></video>'
     
     let sources = []
     for(let i = 0; i < json.sources.length; i++) {
@@ -305,6 +317,7 @@ async function display_video(episodeId, mediaId) {
          },
         controls: true,
         fluid: true,
+        "html5": { nativeTextTracks: false },
         sources: sources,
         tracks: captions
       };
