@@ -1,42 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Movie Search Website</title>
     <!-- font awesome icons cdn -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- custom css -->
 
     <link href="https://vjs.zencdn.net/7.0.0/video-js.css" rel="stylesheet" />
     <link href="https://unpkg.com/@silvermine/videojs-quality-selector/dist/css/quality-selector.css" rel="stylesheet">
-     <link rel = "stylesheet" href = "main.css"> 
-<link rel = "stylesheet" href = "vjs-style.css">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="vjs-style.css">
 </head>
+
 <body>
-    
-    <div class = "wrapper">
+
+    <div class="wrapper">
         <!-- logo -->
-        <div class = "logo">
-            <div class = "container" id="logo-container">
+        <div class="logo">
+            <div onClick="location.href='./index.html'" class="container" id="logo-container">
                 <!-- <img src="./icon.png"></img> -->
                 <p>Movie<span>Corn.</span></p>
             </div>
             <div class="theme-switch-wrapper">
-                  <label class="theme-switch" for="checkbox">
-                  <input type="checkbox" id="checkbox" />
-                <div class="slider round"></div>
-              </label>
-          </div>
+                <label class="theme-switch" for="checkbox">
+                    <input type="checkbox" id="checkbox" />
+                    <div class="slider round"></div>
+                </label>
+            </div>
         </div>
         <!-- end of logo -->
         <!-- search container -->
-        <div class = "search-container">
-            <div class = "search-element">
-                <input type = "text" class = "form-control" placeholder="search..." id = "movie-search-box" onkeyup="findMovies()" onclick="findMovies()">
+        <div class="search-container">
+            <div class="search-element">
+                <input type="text" class="form-control" placeholder="search..." id="movie-search-box"
+                    onkeyup="findMovies()" onclick="findMovies()">
 
-                <div class = "search-list" id = "search-list">
+                <div class="search-list" id="search-list">
                     <!-- list here -->
                     <!-- <div class = "search-list-item">
                         <div class = "search-item-thumbnail">
@@ -51,14 +56,14 @@
             </div>
         </div>
         <!-- end of search container -->
-
+        <div class="container" id="history-grid"></div>
         <!-- result container -->
-        <div class = "container">
-            <div class = "result-container">
-                <div class = "result-grid" id = "result-grid">
-                <div class="watch-grid" id="watch-grid"></div>
+        <div class="container">
+            <div class="result-container">
+                <div class="result-grid" id="result-grid">
+                    <div class="watch-grid" id="watch-grid"></div>
                 </div>
-                
+
                 <div class="video-grid" id="video-grid"></div>
             </div>
         </div>
@@ -69,16 +74,19 @@
     <!-- movie app js -->
 
     <script src="https://vjs.zencdn.net/7.0.0/video.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-quality-levels/3.0.0/videojs-contrib-quality-levels.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-quality-levels/3.0.0/videojs-contrib-quality-levels.min.js"></script>
 
-<script src="https://unpkg.com/silvermine-videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script>
-<script src="https://unpkg.com/fast-average-color/dist/index.browser.min.js"></script>
+    <script
+        src="https://unpkg.com/silvermine-videojs-quality-selector/dist/js/silvermine-videojs-quality-selector.min.js"></script>
+    <script src="https://unpkg.com/fast-average-color/dist/index.browser.min.js"></script>
 
-    <script src = "script.js"></script>
+    <script src="script.js"></script>
 
-<script>
+    <script>
 
 
-</script>
+    </script>
 </body>
+
 </html>
