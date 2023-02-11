@@ -119,7 +119,7 @@ function loadMovieDetails(){
             searchList.classList.add('hide-search-list');
             movieSearchBox.value = "";
             const imdb_id = movie.dataset.id
-            const url = `./movie.html?id=${imdb_id}`
+            const url = `./index.html?id=${imdb_id}`
             window.location.href = url;
             displayMovieDetails(imdb_id);
         });
