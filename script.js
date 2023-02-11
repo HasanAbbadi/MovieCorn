@@ -1,6 +1,6 @@
 // Titles: https://omdbapi.com/?s=thor&page=1&apikey=fc1fef96
 // details: http://www.omdbapi.com/?i=tt3896198&apikey=fc1fef96
-
+const  root = document.documentElement;
 const movieSearchBox = document.getElementById('movie-search-box');
 const searchList = document.getElementById('search-list');
 const resultGrid = document.getElementById('result-grid');
@@ -28,16 +28,31 @@ displayMovieDetails(imdb_id)
 
 const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
 
-function switchTheme(e) {
-    if (e.target.checked) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-    }
-    else {
-        document.documentElement.setAttribute('data-theme', 'light');
-    }    
+
+function LightenDarkenColor(color, amount) {
+    if ( color[0] == "#" ) {color = color.slice(1);}
+    return '#' + color.replace(/^#/, '').replace(/../g, color => ('0'+Math.min(255, Math.max(0, parseInt(color, 16) + amount)).toString(16)).substr(-2));
+
 }
 
-toggleSwitch.addEventListener('change', switchTheme, false);
+async function material_you(img, theme) {
+    const fac = new FastAverageColor();
+              
+    fac.getColorAsync(img).then((color) => {
+    root.style.setProperty('--primary-color', color.hex);
+    
+      if (theme == "light"){
+          root.style.setProperty('--background-color', LightenDarkenColor(color.hex, 83))
+          root.style.setProperty('--light-background-color', LightenDarkenColor(color.hex, 70))
+          root.style.setProperty('--md-background-color', LightenDarkenColor(color.hex, 70))
+      } else if(theme == "dark") {
+          root.style.setProperty('--background-color', LightenDarkenColor(color.hex, -98))
+          root.style.setProperty('--light-background-color', LightenDarkenColor(color.hex, -80))
+          root.style.setProperty('--md-background-color', LightenDarkenColor(color.hex, -80))
+      }
+
+    })
+}
 
 
 // load movies from API
@@ -102,6 +117,22 @@ function loadMovieDetails(){
 async function displayMovieDetails(imdb_id){
     const result = await fetch(`https://www.omdbapi.com/?i=${imdb_id}&apikey=fc1fef96`);
     const details = await result.json();
+    
+    material_you(details.Poster, "dark")
+    
+    function switchTheme(e) {
+    if (e.target.checked) {
+        document.documentElement.setAttribute('data-theme', 'light');
+        material_you(details.Poster, "light")
+    }   
+    else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        material_you(details.Poster, "dark")
+    }    
+      }
+
+    toggleSwitch.addEventListener('change', switchTheme, false);
+    
     resultGrid.innerHTML = `
     <div class = "movie-poster">
         <img src = "${(details.Poster != "N/A") ? details.Poster : "image_not_found.png"}" alt = "movie poster">
@@ -122,6 +153,8 @@ async function displayMovieDetails(imdb_id){
         <div class="watch-grid" id="watch-grid"></div>
     </div>
     `;
+    
+
    
     watchGrid = document.getElementById('watch-grid');
 
@@ -135,6 +168,7 @@ async function displayMovieDetails(imdb_id){
       watch_series(details.Title)
     }
     
+
 }
 
 
