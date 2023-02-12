@@ -1,5 +1,5 @@
-// Titles: https://omdbapi.com/?s=thor&page=1&apikey=fc1fef96
-// details: http://www.omdbapi.com/?i=tt3896198&apikey=fc1fef96
+// Titles: https://omdbapi.com/?s=thor&page=1&apikey=${api_key}
+// details: http://www.omdbapi.com/?i=tt3896198&apikey=${api_key}
 const root = document.documentElement;
 const movieSearchBox = document.getElementById("movie-search-box");
 const historyGrid = document.getElementById("history-grid");
@@ -9,9 +9,13 @@ const videoGrid = document.getElementById("video-grid");
 const consumetapi = "https://api.consumet.org/movies/flixhq";
 let watchGrid;
 
+let imdb_keys = ["b5cff164", "89a9f57d", "73a9858a"];
+
+const api_key = imdb_keys[Math.floor(Math.random() * imdb_keys.length)];
+
 const history = JSON.parse(localStorage.getItem("history"));
 if (history == null) {
-  localStorage.setItem('history', JSON.stringify([]))
+  localStorage.setItem("history", JSON.stringify([]));
 }
 
 function findGetParameter(parameterName) {
@@ -146,7 +150,7 @@ function loadHistory() {
 
 // load movies from API
 async function loadMovies(searchTerm) {
-  const URL = `https://omdbapi.com/?s=${searchTerm}&page=1&apikey=fc1fef96`;
+  const URL = `https://omdbapi.com/?s=${searchTerm}&page=1&apikey=${api_key}`;
   const res = await fetch(`${URL}`);
   const data = await res.json();
   // console.log(data.Search);
@@ -154,12 +158,24 @@ async function loadMovies(searchTerm) {
 }
 
 function findMovies() {
-  let searchTerm = movieSearchBox.value.trim();
-  if (searchTerm.length > 0) {
-    searchList.classList.remove("hide-search-list");
-    loadMovies(searchTerm);
-  } else {
-    searchList.classList.add("hide-search-list");
+  //on keyup, start the countdown
+  let typingTimer; //timer identifier
+  let doneTypingInterval = 1000; //time in ms (5 seconds)
+  movieSearchBox.addEventListener("keyup", () => {
+    clearTimeout(typingTimer);
+    if (movieSearchBox.value) {
+      typingTimer = setTimeout(search_list, doneTypingInterval);
+    }
+  });
+
+  function search_list() {
+    let searchTerm = movieSearchBox.value.trim();
+    if (searchTerm.length > 0) {
+      searchList.classList.remove("hide-search-list");
+      loadMovies(searchTerm);
+    } else {
+      searchList.classList.add("hide-search-list");
+    }
   }
 }
 
@@ -203,7 +219,7 @@ function loadMovieDetails() {
 
 async function displayMovieDetails(imdb_id) {
   const result = await fetch(
-    `https://www.omdbapi.com/?i=${imdb_id}&apikey=fc1fef96`
+    `https://www.omdbapi.com/?i=${imdb_id}&apikey=${api_key}`
   );
   const details = await result.json();
 
