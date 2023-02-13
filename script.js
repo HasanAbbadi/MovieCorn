@@ -6,7 +6,8 @@ const historyGrid = document.getElementById("history-grid");
 const searchList = document.getElementById("search-list");
 const resultGrid = document.getElementById("result-grid");
 const videoGrid = document.getElementById("video-grid");
-const consumetapi = "https://api.consumet.org/movies/flixhq";
+//const consumetapi = "https://api.consumet.org/movies/flixhq";
+const consumetapi = "https://api.consumet.org/meta/tmdb";
 let watchGrid;
 
 let imdb_keys = ["b5cff164", "89a9f57d", "73a9858a"];
@@ -40,9 +41,9 @@ if (imdb_id == "clear_hist") {
   loadHistory();
 }
 
-const toggleSwitch = document.querySelector(
-  '.theme-switch input[type="checkbox"]'
-);
+const themeSwitch = document.getElementById("theme-checkbox");
+const dynamicSwitch = document.getElementById("dynamic-checkbox");
+
 const currentTheme = localStorage.getItem("theme")
   ? localStorage.getItem("theme")
   : null;
@@ -50,8 +51,16 @@ const currentTheme = localStorage.getItem("theme")
 if (currentTheme) {
   document.documentElement.setAttribute("data-theme", currentTheme);
   if (currentTheme == "light") {
-    toggleSwitch.checked = true;
+    themeSwitch.checked = true;
   }
+}
+
+const isDynamic = localStorage.getItem("dynamic")
+  ? localStorage.getItem("dynamic")
+  : null;
+
+if (isDynamic == true) {
+  dynamicSwitch.checked = true;
 }
 
 function switchTheme(e) {
@@ -63,7 +72,17 @@ function switchTheme(e) {
     localStorage.setItem("theme", "dark");
   }
 }
-toggleSwitch.addEventListener("change", switchTheme, false);
+themeSwitch.addEventListener("change", switchTheme, false);
+
+function switchDynamic(e) {
+  if (e.target.checked) {
+    localStorage.setItem("dynamic", true);
+  } else {
+    localStorage.setItem("dynamic", false);
+  }
+  console.log("change");
+}
+dynamicSwitch.addEventListener("change", switchDynamic, false);
 
 function LightenDarkenColor(color, amount) {
   if (color[0] == "#") {
@@ -83,9 +102,12 @@ function LightenDarkenColor(color, amount) {
 }
 
 async function material_you(img, theme) {
+  if (dynamicSwitch.checked == true) {return}
+  console.log(dynamicSwitch.checked)
+
   const fac = new FastAverageColor();
 
-  fac.getColorAsync(img).then((color) => {
+  fac.getColorAsync(img, { algorithm: "sqrt" }).then((color) => {
     root.style.setProperty("--primary-color", color.hex);
 
     if (theme == "light") {
@@ -160,7 +182,7 @@ async function loadMovies(searchTerm) {
 function findMovies() {
   //on keyup, start the countdown
   let typingTimer; //timer identifier
-  let doneTypingInterval = 1000; //time in ms (5 seconds)
+  let doneTypingInterval = 600; //time in ms (5 seconds)
   movieSearchBox.addEventListener("keyup", () => {
     clearTimeout(typingTimer);
     if (movieSearchBox.value) {
@@ -218,16 +240,22 @@ function loadMovieDetails() {
 }
 
 async function displayMovieDetails(imdb_id) {
+  document.getElementsByClassName("wrapper")[0].style.visibility = "hidden";
   const result = await fetch(
     `https://www.omdbapi.com/?i=${imdb_id}&apikey=${api_key}`
   );
   const details = await result.json();
+
+  //if (details.Poster != "N/A"){
+  // details.Poster = details.Poster.replace("._V1_SX300", "._V1_SX800")
+  //}
 
   if (currentTheme) {
     material_you(details.Poster, currentTheme);
   } else {
     material_you(details.Poster, "dark");
   }
+
 
   function switchTheme(e) {
     if (e.target.checked) {
@@ -241,12 +269,14 @@ async function displayMovieDetails(imdb_id) {
     }
   }
 
-  toggleSwitch.addEventListener("change", switchTheme, false);
+  themeSwitch.addEventListener("change", switchTheme, false);
 
   resultGrid.innerHTML = `
     <div class = "movie-poster">
         <img src = "${
-          details.Poster != "N/A" ? details.Poster : "image_not_found.png"
+          details.Poster != "N/A"
+            ? details.Poster.replace("._V1_SX300", "._V1_SX800")
+            : "image_not_found.png"
         }" alt = "movie poster">
     </div>
     <div class = "movie-info">
@@ -254,7 +284,9 @@ async function displayMovieDetails(imdb_id) {
         <ul class = "movie-misc-info">
             <li class = "year">${details.Year}</li>
             <li class = "rated">${details.Rated}</li>
-            <li class = "released">${details.Type}</li>
+            <li class = "released"><b><i class= "fas fa-star"></i></b> ${
+              details.imdbRating
+            }</li>
         </ul>
         <p class = "genre"><b>Genre:</b> ${details.Genre}</p>
         <p class = "writer"><b>Writer:</b> ${details.Writer}</p>
@@ -268,6 +300,7 @@ async function displayMovieDetails(imdb_id) {
     </div>
     `;
 
+  document.getElementsByClassName("wrapper")[0].style.visibility = "visible";
   watchGrid = document.getElementById("watch-grid");
 
   if (details.Type == "movie") {
@@ -366,9 +399,16 @@ async function watch_movie(title, year) {
   if (match == null) {
     return null;
   }
-  const id = match[0].id.split("-").pop();
+  // const id = match[0].id.split("-").pop();
+  let id = match[0].id;
+  const res = await fetch(`${consumetapi}/info/${id}?type=${match[0].type}`);
+  const json = await res.json();
+  id = json.id.split("-").pop();
 
-  display_video(id, match[0].id);
+
+  console.log(id, json.id)
+  //display_video(id, match[0].id);
+  display_video(id, json.id);
 }
 
 async function watch_series(title, details) {
@@ -379,10 +419,12 @@ async function watch_series(title, details) {
     return el.title == title && el.type == "TV Series";
   });
 
-  const watchLink = await fetch(`${consumetapi}/info?id=${match[0].id}`);
+  //const watchLink = await fetch(`${consumetapi}/info?id=${match[0].id}`);
+  const watchLink = await fetch(`${consumetapi}/info/${match[0].id}?type=${match[0].type}`);
+  console.log(`${consumetapi}/info/${match[0].id}?type=${match[0].type}`)
   const json = await watchLink.json();
   const media_id = json.id;
-  const seasons = json.episodes.pop().season;
+  const seasons = json.seasons.pop().season;
   console.log(seasons);
 
   const season_select = document.createElement("select");
@@ -403,9 +445,11 @@ async function watch_series(title, details) {
 
   function on_season_change() {
     document.getElementById("episodes_selector").innerHTML = "";
-    const episodes = json.episodes.filter(function (el) {
+    let episodes = json.seasons.filter(function (el) {
       return el.season == season_select.value;
     });
+    episodes = episodes[0].episodes
+    console.log(episodes)
     for (var i = 0; i < episodes.length; i++) {
       var option = document.createElement("option");
       option.value = episodes[i].id;
@@ -440,9 +484,14 @@ async function watch_series(title, details) {
 }
 
 async function display_video(episodeId, mediaId) {
+  
+  //const watchLink = await fetch(
+   // `${consumetapi}/watch?episodeId=${episodeId}&mediaId=${mediaId}&source=vidsrc`
+  //);
   const watchLink = await fetch(
-    `${consumetapi}/watch?episodeId=${episodeId}&mediaId=${mediaId}&source=vidsrc`
+   `${consumetapi}/watch/${episodeId}?id=${mediaId}`
   );
+  console.log(watchLink)
   const json = await watchLink.json();
   videoGrid.innerHTML = `<video id="video_1" class="video-js vjs-matrix" data-setup="{}"></video><br>
     <div style="display:flex;justify-content:space-between"><code>Download M3u8:</code><code>ffmpeg -i "https://...m3u8?..." output.mp4</code></div>`;

@@ -27,18 +27,31 @@
                 <!-- <img src="./icon.png"></img> -->
                 <p>Movie<span>Corn.</span></p>
             </div>
-            <div class="theme-switch-wrapper">
-                <label class="theme-switch" for="checkbox">
-                    <input type="checkbox" id="checkbox" />
-                    <div class="slider round"></div>
-                </label>
+            <div class="dropdown">
+                <h3 class="dropbtn"> <i class="fas fa-gear"></i></h3>
+                <div class="dropdown-content">
+                    <div class="theme-switch-wrapper">
+                        <span>Theme: </span>
+                        <label class="theme-switch theme-label" for="theme-checkbox">
+                            <input class="theme" type="checkbox" id="theme-checkbox" />
+                            <div class="slider round"></div>
+                        </label>
+                    </div>
+                    <div class="theme-switch-wrapper">
+                        <span>Dynamic: </span>
+                        <label class="theme-switch dynamic-label" for="dynamic-checkbox">
+                            <input class="dynamic" type="checkbox" id="dynamic-checkbox" />
+                            <div class="slider"></div>
+                        </label>
+                    </div>
+                </div>
             </div>
         </div>
         <!-- end of logo -->
         <!-- search container -->
         <div class="search-container">
             <div class="search-element">
-                <input type="text" class="form-control" placeholder="search..." id="movie-search-box"
+                <input type="text" class="form-control" placeholder="&#xF002;" style="font-family:Arial, FontAwesome" id="movie-search-box"
                     onkeyup="findMovies()" onclick="findMovies()">
 
                 <div class="search-list" id="search-list">
