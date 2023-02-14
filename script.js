@@ -8,6 +8,8 @@ const resultGrid = document.getElementById("result-grid");
 const videoGrid = document.getElementById("video-grid");
 //const consumetapi = "https://api.consumet.org/movies/flixhq";
 const consumetapi = "https://api.consumet.org/meta/tmdb";
+const mysubsApi = 'https://api.codetabs.com/v1/proxy?quest=https://www.mysubs.org';
+
 let watchGrid;
 
 let imdb_keys = ["b5cff164", "89a9f57d", "73a9858a"];
@@ -389,6 +391,25 @@ function removeHistory(id) {
   }
 }
 
+// get arabic subtitles for movies only
+async function get_sub(imdb_id) {
+    const res = await fetch(`${mysubsApi}/${imdb_id}`)
+    const body = await res.text()
+    let pos = body.search('/view/')
+    let id = body.slice((pos + 6), (pos+ 11))
+    const sub = `${mysubsApi}/get-subtitle/${id}`
+
+    console.log("sub:" + sub);
+    const data = await fetch(sub);
+    let text = await data.text()
+    text = "WEBVTT\n\n" + text
+    text = text.replace(/,/g, '.')
+    const vttBlob = new Blob([text.trim()], {type: 'text/plain'});
+    const vttURL = URL.createObjectURL(vttBlob);
+    return vttURL
+}
+
+
 async function watch_movie(title, year) {
   const result = await fetch(`${consumetapi}/${title}`);
   const movieDetails = await result.json();
@@ -550,7 +571,19 @@ async function display_video(episodeId, mediaId) {
 
   const video_el = document.getElementById("video_1");
 
-  videojs(video_el, options);
+  const player = videojs(video_el, options);
+
+  const vttURL = await get_sub(imdb_id);
+  console.log("vtt:" + vttURL)
+  if (vttURL != ""){
+    arCaption = {
+      src: vttURL,
+      kind: "captions",
+      label: 'ALT-arabic'
+    }
+    player.addRemoteTextTrack(arCaption)
+  }
+
 }
 
 window.addEventListener("click", (event) => {
