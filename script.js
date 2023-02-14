@@ -8,7 +8,8 @@ const resultGrid = document.getElementById("result-grid");
 const videoGrid = document.getElementById("video-grid");
 //const consumetapi = "https://api.consumet.org/movies/flixhq";
 const consumetapi = "https://api.consumet.org/meta/tmdb";
-const mysubsApi = 'https://api.codetabs.com/v1/proxy?quest=https://www.mysubs.org';
+const mysubsApi =
+  "https://api.codetabs.com/v1/proxy?quest=https://www.mysubs.org";
 
 let watchGrid;
 
@@ -158,13 +159,21 @@ function loadHistory() {
       historyGrid.innerHTML += `
       <div class="history-item" onclick="location.href='./index.html?id=${
         movie.id
-      }'" style="background-color: ${movie.color}">
+      }'" style="background: linear-gradient(45deg, ${movie.color}, var(--light-background-color))">
             <img src="${movie.poster}"></img>
             <div><h3>${movie.title}</h3>
             <span>${movie.time}</span>
             <span>${movie.season == undefined ? "" : movie.season + ": "}${
         movie.episode == undefined ? "" : movie.episode
-      }</span></div>
+      }</span>
+            ${
+              movie.progress == undefined
+                ? ""
+                : `<div class="progress-background">
+                <div style="width:${movie.progress}%;background-color:${movie.color}" class="progress-foreground"></div>
+                 ${movie.progress}%</div>`
+            }
+      </div>
             <div class="remove-history" onClick="removeHistory('${
               movie.id
             }')">X</div>
@@ -326,13 +335,13 @@ function addHistory(details, type, season, episode) {
   var datetime =
     currentdate.getDate() +
     "/" +
-    String((currentdate.getMonth() + 1)).padStart(2, '0') +
+    String(currentdate.getMonth() + 1).padStart(2, "0") +
     "/" +
     currentdate.getFullYear() +
     " @ " +
-    String(currentdate.getHours()).padStart(2, '0') +
+    String(currentdate.getHours()).padStart(2, "0") +
     ":" +
-    String(currentdate.getMinutes()).padStart(2, '0');
+    String(currentdate.getMinutes()).padStart(2, "0");
 
   if (history) {
     const exist = history.filter(function (el) {
@@ -393,22 +402,21 @@ function removeHistory(id) {
 
 // get arabic subtitles for movies only
 async function get_sub(imdb_id) {
-    const res = await fetch(`${mysubsApi}/${imdb_id}`)
-    const body = await res.text()
-    let pos = body.search('/view/')
-    let id = body.slice((pos + 6), (pos+ 11))
-    const sub = `${mysubsApi}/get-subtitle/${id}`
+  const res = await fetch(`${mysubsApi}/${imdb_id}`);
+  const body = await res.text();
+  let pos = body.search("/view/");
+  let id = body.slice(pos + 6, pos + 11);
+  const sub = `${mysubsApi}/get-subtitle/${id}`;
 
-    console.log("sub:" + sub);
-    const data = await fetch(sub);
-    let text = await data.text()
-    text = "WEBVTT\n\n" + text
-    text = text.replace(/,/g, '.')
-    const vttBlob = new Blob([text.trim()], {type: 'text/plain'});
-    const vttURL = URL.createObjectURL(vttBlob);
-    return vttURL
+  console.log("sub:" + sub);
+  const data = await fetch(sub);
+  let text = await data.text();
+  text = "WEBVTT\n\n" + text;
+  text = text.replace(/,/g, ".");
+  const vttBlob = new Blob([text.trim()], { type: "text/plain" });
+  const vttURL = URL.createObjectURL(vttBlob);
+  return vttURL;
 }
-
 
 async function watch_movie(title, year) {
   const result = await fetch(`${consumetapi}/${title}`);
@@ -531,7 +539,7 @@ async function display_video(episodeId, mediaId) {
     `;
   }
 
-  console.log(sources)
+  console.log(sources);
 
   let captions = [];
   let languages = ["Arabic", "Spanish", "English", "German"];
@@ -552,9 +560,9 @@ async function display_video(episodeId, mediaId) {
     controlBar: {
       children: [
         "playToggle",
-        'currentTimeDisplay',
+        "currentTimeDisplay",
         "progressControl",
-        'durationDisplay',
+        "durationDisplay",
         "volumePanel",
         "captionsButton",
         "qualitySelector",
@@ -573,17 +581,45 @@ async function display_video(episodeId, mediaId) {
 
   const player = videojs(video_el, options);
 
+  player.landscapeFullscreen();
+
   const vttURL = await get_sub(imdb_id);
-  console.log("vtt:" + vttURL)
-  if (vttURL != ""){
+  console.log("vtt:" + vttURL);
+  if (vttURL != "") {
     arCaption = {
       src: vttURL,
       kind: "captions",
-      label: 'ALT-arabic'
-    }
-    player.addRemoteTextTrack(arCaption)
+      label: "ALT-arabic",
+    };
+    player.addRemoteTextTrack(arCaption);
   }
 
+  const history = JSON.parse(localStorage.getItem("history"));
+  const index = history.findIndex((x) => x.id == imdb_id);
+  const timestamp = history[index].timestamp;
+
+  // you could also get it through AJAX here
+  console.log("timestamp:" + timestamp);
+  if (timestamp) {
+    player.currentTime(timestamp);
+  }
+  // save the timestamp through DB polling (every 10s)
+  setInterval(() => {
+    const previousTimestamp = history[index].timestamp
+      ? history[index].timestamp
+      : 0;
+
+    if (player.paused() == false) {
+      if (previousTimestamp !== player.currentTime()) {
+        history[index].timestamp = player.currentTime();
+        history[index].progress = Math.round(
+          (player.currentTime() / player.duration()) * 100
+        );
+        console.log("saved video timestamp at " + player.currentTime());
+      }
+      localStorage.setItem("history", JSON.stringify(history));
+    }
+  }, 10000);
 }
 
 window.addEventListener("click", (event) => {
