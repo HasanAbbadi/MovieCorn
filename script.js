@@ -102,8 +102,10 @@ function LightenDarkenColor(color, amount) {
 }
 
 async function material_you(img, theme) {
-  if (dynamicSwitch.checked == true) {return}
-  console.log(dynamicSwitch.checked)
+  if (dynamicSwitch.checked == true) {
+    return;
+  }
+  console.log(dynamicSwitch.checked);
 
   const fac = new FastAverageColor();
 
@@ -256,7 +258,6 @@ async function displayMovieDetails(imdb_id) {
     material_you(details.Poster, "dark");
   }
 
-
   function switchTheme(e) {
     if (e.target.checked) {
       document.documentElement.setAttribute("data-theme", "light");
@@ -323,13 +324,13 @@ function addHistory(details, type, season, episode) {
   var datetime =
     currentdate.getDate() +
     "/" +
-    (currentdate.getMonth() + 1) +
+    String((currentdate.getMonth() + 1)).padStart(2, '0') +
     "/" +
     currentdate.getFullYear() +
     " @ " +
-    currentdate.getHours() +
+    String(currentdate.getHours()).padStart(2, '0') +
     ":" +
-    currentdate.getMinutes();
+    String(currentdate.getMinutes()).padStart(2, '0');
 
   if (history) {
     const exist = history.filter(function (el) {
@@ -405,8 +406,7 @@ async function watch_movie(title, year) {
   const json = await res.json();
   id = json.id.split("-").pop();
 
-
-  console.log(id, json.id)
+  console.log(id, json.id);
   //display_video(id, match[0].id);
   display_video(id, json.id);
 }
@@ -420,8 +420,10 @@ async function watch_series(title, details) {
   });
 
   //const watchLink = await fetch(`${consumetapi}/info?id=${match[0].id}`);
-  const watchLink = await fetch(`${consumetapi}/info/${match[0].id}?type=${match[0].type}`);
-  console.log(`${consumetapi}/info/${match[0].id}?type=${match[0].type}`)
+  const watchLink = await fetch(
+    `${consumetapi}/info/${match[0].id}?type=${match[0].type}`
+  );
+  console.log(`${consumetapi}/info/${match[0].id}?type=${match[0].type}`);
   const json = await watchLink.json();
   const media_id = json.id;
   const seasons = json.seasons.pop().season;
@@ -448,8 +450,8 @@ async function watch_series(title, details) {
     let episodes = json.seasons.filter(function (el) {
       return el.season == season_select.value;
     });
-    episodes = episodes[0].episodes
-    console.log(episodes)
+    episodes = episodes[0].episodes;
+    console.log(episodes);
     for (var i = 0; i < episodes.length; i++) {
       var option = document.createElement("option");
       option.value = episodes[i].id;
@@ -484,16 +486,15 @@ async function watch_series(title, details) {
 }
 
 async function display_video(episodeId, mediaId) {
-  
   //const watchLink = await fetch(
-   // `${consumetapi}/watch?episodeId=${episodeId}&mediaId=${mediaId}&source=vidsrc`
+  // `${consumetapi}/watch?episodeId=${episodeId}&mediaId=${mediaId}&source=vidsrc`
   //);
   const watchLink = await fetch(
-   `${consumetapi}/watch/${episodeId}?id=${mediaId}`
+    `${consumetapi}/watch/${episodeId}?id=${mediaId}`
   );
-  console.log(watchLink)
+  console.log(watchLink);
   const json = await watchLink.json();
-  videoGrid.innerHTML = `<video id="video_1" class="video-js vjs-matrix" data-setup="{}"></video><br>
+  videoGrid.innerHTML = `<video id="video_1" class="video-js vjs-matrix"></video><br>
     <div style="display:flex;justify-content:space-between"><code>Download M3u8:</code><code>ffmpeg -i "https://...m3u8?..." output.mp4</code></div>`;
 
   let sources = [];
@@ -508,6 +509,8 @@ async function display_video(episodeId, mediaId) {
         <button onClick="navigator.clipboard.writeText('${source.url}')">${source.quality}</button>
     `;
   }
+
+  console.log(sources)
 
   let captions = [];
   let languages = ["Arabic", "Spanish", "English", "German"];
@@ -528,7 +531,9 @@ async function display_video(episodeId, mediaId) {
     controlBar: {
       children: [
         "playToggle",
+        'currentTimeDisplay',
         "progressControl",
+        'durationDisplay',
         "volumePanel",
         "captionsButton",
         "qualitySelector",
@@ -538,6 +543,7 @@ async function display_video(episodeId, mediaId) {
     controls: true,
     fluid: true,
     html5: { nativeTextTracks: false },
+    vhs: { overrideNative: true },
     sources: sources,
     tracks: captions,
   };
