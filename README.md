@@ -14,5 +14,5 @@ Streaming Site with no Ads.
 ✅ No Ads 🚫       
 ✅ Light & Dark Themes   
 ✅ Dynamic Theme        
-⬛ Pick Up Where You Left Off        
+✅ Pick Up Where You Left Off        
 ⬛ Latest Movies, Series & Anime        
