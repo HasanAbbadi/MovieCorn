@@ -1,25 +1,83 @@
 // Titles: https://omdbapi.com/?s=thor&page=1&apikey=${api_key}
 // details: http://www.omdbapi.com/?i=tt3896198&apikey=${api_key}
+
 const root = document.documentElement;
 const movieSearchBox = document.getElementById("movie-search-box");
 const historyGrid = document.getElementById("history-grid");
 const searchList = document.getElementById("search-list");
 const resultGrid = document.getElementById("result-grid");
 const videoGrid = document.getElementById("video-grid");
-//const consumetapi = "https://api.consumet.org/movies/flixhq";
-const consumetapi = "https://api.consumet.org/meta/tmdb";
-const mysubsApi =
-  "https://api.codetabs.com/v1/proxy?quest=https://www.mysubs.org";
-
 let watchGrid;
 
+const themeSwitch = document.getElementById("theme-checkbox");
+const dynamicSwitch = document.getElementById("dynamic-checkbox");
+
+// The apis I'll be using
+const omdb_api = "https://omdbapi.com";
+const consumetapi = "https://c.delusionz.xyz/movies/flixhq";
+const mysubsApi =
+  "https://corsproxy.io/?https://www.mysubs.org";
+
+// multiple api keys to avoid hitting the daily limit of 3000
 let imdb_keys = ["b5cff164", "89a9f57d", "73a9858a"];
+const api_key = imdb_keys[Math.floor(Math.random() * imdb_keys.length)]; //random api key
 
-const api_key = imdb_keys[Math.floor(Math.random() * imdb_keys.length)];
-
+// initailize history and create if not exist
 const history = JSON.parse(localStorage.getItem("history"));
 if (history == null) {
   localStorage.setItem("history", JSON.stringify([]));
+}
+
+// current theme and if dynamic is true
+const currentTheme = localStorage.getItem("theme")
+  ? localStorage.getItem("theme")
+  : null;
+
+const isDynamic = localStorage.getItem("dynamic")
+  ? localStorage.getItem("dynamic")
+  : null;
+
+// check the corresponding checkbox
+if (currentTheme) {
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  if (currentTheme == "light") {
+    themeSwitch.checked = true;
+  }
+}
+
+if (isDynamic == true) {
+  dynamicSwitch.checked = true;
+}
+
+function switchTheme(e) {
+  if (e.target.checked) {
+    document.documentElement.setAttribute("data-theme", "light");
+    localStorage.setItem("theme", "light");
+  } else {
+    document.documentElement.setAttribute("data-theme", "dark");
+    localStorage.setItem("theme", "dark");
+  }
+}
+
+function switchDynamic(e) {
+  if (e.target.checked) {
+    localStorage.setItem("dynamic", true);
+  } else {
+    localStorage.setItem("dynamic", false);
+  }
+}
+
+themeSwitch.addEventListener("change", switchTheme, false);
+dynamicSwitch.addEventListener("change", switchDynamic, false);
+
+// index.html?id={value}
+const imdb_id = findGetParameter("id");
+if (imdb_id == "clear_hist") {
+  localStorage.setItem("history", JSON.stringify([]));
+} else if (imdb_id != null) {
+  displayMovieDetails(imdb_id);
+} else {
+  loadHistory();
 }
 
 function findGetParameter(parameterName) {
@@ -35,62 +93,32 @@ function findGetParameter(parameterName) {
   return result;
 }
 
-const imdb_id = findGetParameter("id");
-if (imdb_id == "clear_hist") {
-  localStorage.setItem("history", JSON.stringify([]));
-} else if (imdb_id != null) {
-  displayMovieDetails(imdb_id);
-} else {
-  loadHistory();
-}
-
-const themeSwitch = document.getElementById("theme-checkbox");
-const dynamicSwitch = document.getElementById("dynamic-checkbox");
-
-const currentTheme = localStorage.getItem("theme")
-  ? localStorage.getItem("theme")
-  : null;
-
-if (currentTheme) {
-  document.documentElement.setAttribute("data-theme", currentTheme);
-  if (currentTheme == "light") {
-    themeSwitch.checked = true;
+async function material_you(img, theme) {
+  if (dynamicSwitch.checked == true) {
+    return;
   }
+
+  const fac = new FastAverageColor();
+  fac.getColorAsync(img, { algorithm: "sqrt" }).then((color) => {
+    root.style.setProperty("--primary-color", color.hex);
+    if (theme == "light") {
+      changeProperty("--background-color", color.hex, 83);
+      changeProperty("--light-background-color", color.hex, 70);
+      changeProperty("--md-background-color", color.hex, 70);
+    } else {
+      changeProperty("--background-color", color.hex, -98);
+      changeProperty("--light-background-color", color.hex, -80);
+      changeProperty("--md-background-color", color.hex, -80);
+    }
+  });
 }
 
-const isDynamic = localStorage.getItem("dynamic")
-  ? localStorage.getItem("dynamic")
-  : null;
-
-if (isDynamic == true) {
-  dynamicSwitch.checked = true;
+function changeProperty(property, color, hueValue) {
+  root.style.setProperty(property, LightenDarkenColor(color, hueValue));
 }
 
-function switchTheme(e) {
-  if (e.target.checked) {
-    document.documentElement.setAttribute("data-theme", "light");
-    localStorage.setItem("theme", "light");
-  } else {
-    document.documentElement.setAttribute("data-theme", "dark");
-    localStorage.setItem("theme", "dark");
-  }
-}
-themeSwitch.addEventListener("change", switchTheme, false);
-
-function switchDynamic(e) {
-  if (e.target.checked) {
-    localStorage.setItem("dynamic", true);
-  } else {
-    localStorage.setItem("dynamic", false);
-  }
-  console.log("change");
-}
-dynamicSwitch.addEventListener("change", switchDynamic, false);
-
+// make color lighter or darker
 function LightenDarkenColor(color, amount) {
-  if (color[0] == "#") {
-    color = color.slice(1);
-  }
   return (
     "#" +
     color
@@ -104,92 +132,38 @@ function LightenDarkenColor(color, amount) {
   );
 }
 
-async function material_you(img, theme) {
-  if (dynamicSwitch.checked == true) {
-    return;
-  }
-  console.log(dynamicSwitch.checked);
-
-  const fac = new FastAverageColor();
-
-  fac.getColorAsync(img, { algorithm: "sqrt" }).then((color) => {
-    root.style.setProperty("--primary-color", color.hex);
-
-    if (theme == "light") {
-      root.style.setProperty(
-        "--background-color",
-        LightenDarkenColor(color.hex, 83)
-      );
-      root.style.setProperty(
-        "--light-background-color",
-        LightenDarkenColor(color.hex, 70)
-      );
-      root.style.setProperty(
-        "--md-background-color",
-        LightenDarkenColor(color.hex, 70)
-      );
-    } else if (theme == "dark") {
-      root.style.setProperty(
-        "--background-color",
-        LightenDarkenColor(color.hex, -98)
-      );
-      root.style.setProperty(
-        "--light-background-color",
-        LightenDarkenColor(color.hex, -80)
-      );
-      root.style.setProperty(
-        "--md-background-color",
-        LightenDarkenColor(color.hex, -80)
-      );
-    }
-  });
-}
-
 function loadHistory() {
   historyGrid.innerHTML = "";
-  const history = JSON.parse(localStorage.getItem("history"));
 
-  console.log(history);
-  if (history) {
-    let i = 0;
-    history.forEach((movie) => {
-      i += 1;
-      console.log(movie.title);
+  let i = 0;
+  history.forEach((movie) => {
+    i += 1;
 
-      historyGrid.innerHTML += `
+    const progressDiv = `
+      <div class="progress-background">
+      <div style="width:${movie.progress}%;background-color:${movie.color}" class="progress-foreground"></div>
+      ${movie.progress}%</div>`;
+
+    historyGrid.innerHTML += `
       <div class="history-item" onclick="location.href='./index.html?id=${
         movie.id
-      }'" style="background: linear-gradient(45deg, ${movie.color}, var(--light-background-color))">
+      }'" style="background: linear-gradient(45deg, ${
+      movie.color
+    }, var(--light-background-color))">
             <img src="${movie.poster}"></img>
             <div><h3>${movie.title}</h3>
             <span>${movie.time}</span>
             <span>${movie.season == undefined ? "" : movie.season + ": "}${
-        movie.episode == undefined ? "" : movie.episode
-      }</span>
-            ${
-              movie.progress == undefined
-                ? ""
-                : `<div class="progress-background">
-                <div style="width:${movie.progress}%;background-color:${movie.color}" class="progress-foreground"></div>
-                 ${movie.progress}%</div>`
-            }
+      movie.episode == undefined ? "" : movie.episode
+    }</span>
+            ${movie.progress == undefined ? "" : progressDiv}
       </div>
             <div class="remove-history" onClick="removeHistory('${
               movie.id
             }')">X</div>
       </div>
       `;
-    });
-  }
-}
-
-// load movies from API
-async function loadMovies(searchTerm) {
-  const URL = `https://omdbapi.com/?s=${searchTerm}&page=1&apikey=${api_key}`;
-  const res = await fetch(`${URL}`);
-  const data = await res.json();
-  // console.log(data.Search);
-  if (data.Response == "True") displayMovieList(data.Search);
+  });
 }
 
 function findMovies() {
@@ -202,16 +176,24 @@ function findMovies() {
       typingTimer = setTimeout(search_list, doneTypingInterval);
     }
   });
+}
 
-  function search_list() {
-    let searchTerm = movieSearchBox.value.trim();
-    if (searchTerm.length > 0) {
-      searchList.classList.remove("hide-search-list");
-      loadMovies(searchTerm);
-    } else {
-      searchList.classList.add("hide-search-list");
-    }
+function search_list() {
+  let searchTerm = movieSearchBox.value.trim();
+  if (searchTerm.length > 0) {
+    searchList.classList.remove("hide-search-list");
+    loadMovies(searchTerm);
+  } else {
+    searchList.classList.add("hide-search-list");
   }
+}
+
+// load movies from API
+async function loadMovies(searchTerm) {
+  const URL = `${omdb_api}/?s=${searchTerm}&page=1&apikey=${api_key}`;
+  const res = await fetch(`${URL}`);
+  const data = await res.json();
+  if (data.Response == "True") displayMovieList(data.Search);
 }
 
 function displayMovieList(movies) {
@@ -220,6 +202,7 @@ function displayMovieList(movies) {
     let movieListItem = document.createElement("div");
     movieListItem.dataset.id = movies[idx].imdbID; // setting movie id in  data-id
     movieListItem.classList.add("search-list-item");
+
     if (movies[idx].Poster != "N/A") moviePoster = movies[idx].Poster;
     else moviePoster = "image_not_found.png";
 
@@ -254,14 +237,8 @@ function loadMovieDetails() {
 
 async function displayMovieDetails(imdb_id) {
   document.getElementsByClassName("wrapper")[0].style.visibility = "hidden";
-  const result = await fetch(
-    `https://www.omdbapi.com/?i=${imdb_id}&apikey=${api_key}`
-  );
+  const result = await fetch(`${omdb_api}/?i=${imdb_id}&apikey=${api_key}`);
   const details = await result.json();
-
-  //if (details.Poster != "N/A"){
-  // details.Poster = details.Poster.replace("._V1_SX300", "._V1_SX800")
-  //}
 
   if (currentTheme) {
     material_you(details.Poster, currentTheme);
@@ -316,106 +293,82 @@ async function displayMovieDetails(imdb_id) {
   watchGrid = document.getElementById("watch-grid");
 
   if (details.Type == "movie") {
-    watchGrid.innerHTML = `
-        <button id="watch-movie">Watch</button>
-      `;
+    watchGrid.innerHTML = `<button id="watch-movie">Watch</button>`;
     const watchButton = document.getElementById("watch-movie");
+
     watchButton.addEventListener("click", () => {
       watch_movie(details.Title, details.Year);
       addHistory(details, "movie");
-      console.log(history);
     });
   } else {
     watch_series(details.Title, details);
   }
 }
+
 function addHistory(details, type, season, episode) {
   const history = JSON.parse(localStorage.getItem("history"));
-  var currentdate = new Date();
-  var datetime =
-    currentdate.getDate() +
-    "/" +
-    String(currentdate.getMonth() + 1).padStart(2, "0") +
-    "/" +
-    currentdate.getFullYear() +
-    " @ " +
-    String(currentdate.getHours()).padStart(2, "0") +
-    ":" +
-    String(currentdate.getMinutes()).padStart(2, "0");
+  const currentDate = new Date();
+  const datetime = currentDate.toLocaleTimeString();
 
-  if (history) {
-    const exist = history.filter(function (el) {
-      return el.id == imdb_id;
-    });
-    if (exist.length == 0) {
-      if (type == "tv-show") {
-        history.push({
-          title: details.Title,
-          poster: details.Poster,
-          id: imdb_id,
-          color: getComputedStyle(document.documentElement).getPropertyValue(
-            "--primary-color"
-          ),
-          time: datetime,
-          season: season,
-          episode: episode,
-        });
-      } else {
-        history.push({
-          title: details.Title,
-          poster: details.Poster,
-          id: imdb_id,
-          color: getComputedStyle(document.documentElement).getPropertyValue(
-            "--primary-color"
-          ),
-          time: datetime,
-        });
-      }
-      localStorage.setItem("history", JSON.stringify(history));
-    } else {
-      // NOTE: UPDATE EXISTING ENTRIE
-      const index = history.findIndex((x) => x.id == imdb_id);
-      console.log("exists!");
-      history[index].time = datetime;
-      history[index].season = season;
-      history[index].episode = episode;
-      localStorage.setItem("history", JSON.stringify(history));
+  const exist = history.filter(function (el) {
+    return el.id == imdb_id;
+  });
+
+  // if entry exist in history
+  if (exist.length == 0) {
+    const new_entry = {
+      title: details.Title,
+      poster: details.Poster,
+      id: imdb_id,
+      color: getComputedStyle(root).getPropertyValue("--primary-color"),
+      time: datetime,
+    };
+    if (type == "tv-show") {
+      new_entry.season = season;
+      new_entry.episode = episode;
     }
-  } else if (history == null) {
-    localStorage.setItem("history", JSON.stringify([]));
+    history.push(new_entry);
+    localStorage.setItem("history", JSON.stringify(history));
+  } else {
+    // update current history item with updated values
+    const index = history.findIndex((x) => x.id == imdb_id);
+    history[index].time = datetime;
+    history[index].season = season;
+    history[index].episode = episode;
+    localStorage.setItem("history", JSON.stringify(history));
   }
 }
 
 function removeHistory(id) {
   window.event.stopPropagation();
-  console.log("remove!");
-  let history = JSON.parse(localStorage.getItem("history"));
-  if (history) {
-    history = history.filter(function (el) {
-      return el.id != id;
-    });
-    localStorage.setItem("history", JSON.stringify(history));
+  history = history.filter(function (el) {
+    return el.id != id;
+  });
+  localStorage.setItem("history", JSON.stringify(history));
 
-    loadHistory();
-  }
+  loadHistory();
 }
 
 // get arabic subtitles for movies only
 async function get_sub(imdb_id) {
-  const res = await fetch(`${mysubsApi}/${imdb_id}`);
-  const body = await res.text();
-  let pos = body.search("/view/");
-  let id = body.slice(pos + 6, pos + 11);
-  const sub = `${mysubsApi}/get-subtitle/${id}`;
+  const body = await get_body(`${mysubsApi}/${imdb_id}`);
+  const pos = body.search("/view/");
+  const id = body.slice(pos + 6, pos + 11);
+  const sub_down_url = `${mysubsApi}/get-subtitle/${id}`;
 
-  console.log("sub:" + sub);
-  const data = await fetch(sub);
-  let text = await data.text();
+  let text = await get_body(sub_down_url);
+
   text = "WEBVTT\n\n" + text;
   text = text.replace(/,/g, ".");
   const vttBlob = new Blob([text.trim()], { type: "text/plain" });
-  const vttURL = URL.createObjectURL(vttBlob);
-  return vttURL;
+
+  return URL.createObjectURL(vttBlob);
+}
+
+async function get_body(url) {
+  const res = await fetch(url);
+  const body = await res.text();
+  return body;
 }
 
 async function watch_movie(title, year) {
@@ -429,15 +382,9 @@ async function watch_movie(title, year) {
   if (match == null) {
     return null;
   }
-  // const id = match[0].id.split("-").pop();
-  let id = match[0].id;
-  const res = await fetch(`${consumetapi}/info/${id}?type=${match[0].type}`);
-  const json = await res.json();
-  id = json.id.split("-").pop();
 
-  console.log(id, json.id);
-  //display_video(id, match[0].id);
-  display_video(id, json.id);
+  const id = match[0].id.split("-").pop();
+  display_video(id, match[0].id);
 }
 
 async function watch_series(title, details) {
@@ -448,15 +395,10 @@ async function watch_series(title, details) {
     return el.title == title && el.type == "TV Series";
   });
 
-  //const watchLink = await fetch(`${consumetapi}/info?id=${match[0].id}`);
-  const watchLink = await fetch(
-    `${consumetapi}/info/${match[0].id}?type=${match[0].type}`
-  );
-  console.log(`${consumetapi}/info/${match[0].id}?type=${match[0].type}`);
+  const watchLink = await fetch(`${consumetapi}/info?id=${match[0].id}`);
   const json = await watchLink.json();
   const media_id = json.id;
-  const seasons = json.seasons.pop().season;
-  console.log(seasons);
+  const seasons = json.episodes.pop().season;
 
   const season_select = document.createElement("select");
   season_select.name = "Seasons";
@@ -476,11 +418,10 @@ async function watch_series(title, details) {
 
   function on_season_change() {
     document.getElementById("episodes_selector").innerHTML = "";
-    let episodes = json.seasons.filter(function (el) {
+    let episodes = json.episodes.filter(function (el) {
       return el.season == season_select.value;
     });
-    episodes = episodes[0].episodes;
-    console.log(episodes);
+
     for (var i = 0; i < episodes.length; i++) {
       var option = document.createElement("option");
       option.value = episodes[i].id;
@@ -515,13 +456,10 @@ async function watch_series(title, details) {
 }
 
 async function display_video(episodeId, mediaId) {
-  //const watchLink = await fetch(
-  // `${consumetapi}/watch?episodeId=${episodeId}&mediaId=${mediaId}&source=vidsrc`
-  //);
   const watchLink = await fetch(
-    `${consumetapi}/watch/${episodeId}?id=${mediaId}`
+    `${consumetapi}/watch?episodeId=${episodeId}&mediaId=${mediaId}&source=vidcloud`
   );
-  console.log(watchLink);
+
   const json = await watchLink.json();
   videoGrid.innerHTML = `<video id="video_1" class="video-js vjs-matrix"></video><br>
     <div style="display:flex;justify-content:space-between"><code>Download M3u8:</code><code>ffmpeg -i "https://...m3u8?..." output.mp4</code></div>`;
@@ -540,7 +478,6 @@ async function display_video(episodeId, mediaId) {
   }
 
   console.log(sources);
-
   let captions = [];
   let languages = ["Arabic", "Spanish", "English", "German"];
   for (let i = 0; i < json.subtitles.length; i++) {
@@ -555,7 +492,6 @@ async function display_video(episodeId, mediaId) {
     }
   }
 
-  console.log(captions);
   let options = {
     controlBar: {
       children: [
@@ -584,7 +520,6 @@ async function display_video(episodeId, mediaId) {
   player.landscapeFullscreen();
 
   const vttURL = await get_sub(imdb_id);
-  console.log("vtt:" + vttURL);
   if (vttURL != "") {
     arCaption = {
       src: vttURL,
@@ -594,16 +529,15 @@ async function display_video(episodeId, mediaId) {
     player.addRemoteTextTrack(arCaption);
   }
 
-  const history = JSON.parse(localStorage.getItem("history"));
   const index = history.findIndex((x) => x.id == imdb_id);
   const timestamp = history[index].timestamp;
 
-  // you could also get it through AJAX here
-  console.log("timestamp:" + timestamp);
+  // jump to saved timestamp
   if (timestamp) {
     player.currentTime(timestamp);
   }
-  // save the timestamp through DB polling (every 10s)
+
+  // save the timestamp through DB polling (every 20s)
   setInterval(() => {
     const previousTimestamp = history[index].timestamp
       ? history[index].timestamp
@@ -615,11 +549,10 @@ async function display_video(episodeId, mediaId) {
         history[index].progress = Math.round(
           (player.currentTime() / player.duration()) * 100
         );
-        console.log("saved video timestamp at " + player.currentTime());
       }
       localStorage.setItem("history", JSON.stringify(history));
     }
-  }, 10000);
+  }, 20000);
 }
 
 window.addEventListener("click", (event) => {
