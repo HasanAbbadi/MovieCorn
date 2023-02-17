@@ -15,8 +15,7 @@ const dynamicSwitch = document.getElementById("dynamic-checkbox");
 // The apis I'll be using
 const omdb_api = "https://omdbapi.com";
 const consumetapi = "https://c.delusionz.xyz/movies/flixhq";
-const mysubsApi =
-  "https://corsproxy.io/?https://www.mysubs.org";
+const mysubsApi = "https://mysubs-api.vercel.app"
 
 // multiple api keys to avoid hitting the daily limit of 3000
 let imdb_keys = ["b5cff164", "89a9f57d", "73a9858a"];
@@ -349,19 +348,22 @@ function removeHistory(id) {
   loadHistory();
 }
 
-// get arabic subtitles for movies only
+// get arabic subtitles for movies and tv-shows
 async function get_sub(imdb_id) {
-  const body = await get_body(`${mysubsApi}/${imdb_id}`);
-  const pos = body.search("/view/");
-  const id = body.slice(pos + 6, pos + 11);
-  const sub_down_url = `${mysubsApi}/get-subtitle/${id}`;
+  const season_select = document.getElementById('seasons-selector')
+  const episode_select = document.getElementById('episodes-selector')
+  let text
 
-  let text = await get_body(sub_down_url);
+  if (season_select) {
+    const season = String((season_select.selectedIndex) + 1).padStart(2, 0)
+    const episode = String((episode_select.selectedIndex) + 1).padStart(2, 0)
+    text = await get_body(`${mysubsApi}/search/${imdb_id}?lang=Arabic&s=${season}&e=${episode}`);
+  } else {
+    text = await get_body(`${mysubsApi}/search/${imdb_id}?lang=Arabic`);
+  }
 
-  text = "WEBVTT\n\n" + text;
-  text = text.replace(/,/g, ".");
+  text = text.replace(/,/g, '.')
   const vttBlob = new Blob([text.trim()], { type: "text/plain" });
-
   return URL.createObjectURL(vttBlob);
 }
 
@@ -413,11 +415,11 @@ async function watch_series(title, details) {
 
   const episode_select = document.createElement("select");
   episode_select.name = "episodes";
-  episode_select.id = "episodes_selector";
+  episode_select.id = "episodes-selector";
   season_select.onchange = on_season_change;
 
   function on_season_change() {
-    document.getElementById("episodes_selector").innerHTML = "";
+    document.getElementById("episodes-selector").innerHTML = "";
     let episodes = json.episodes.filter(function (el) {
       return el.season == season_select.value;
     });
