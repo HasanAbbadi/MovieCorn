@@ -573,7 +573,7 @@ input.dynamic:checked + div:before {
   text-shadow: 0.4px 0px 0.5px grey;
 }
 
-#episodes_selector {
+#episodes-selector {
   max-width: 250px;
 }
 
