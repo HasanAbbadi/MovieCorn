@@ -15,7 +15,7 @@ const dynamicSwitch = document.getElementById("dynamic-checkbox");
 // The apis I'll be using
 const omdb_api = "https://omdbapi.com";
 const consumetapi = "https://c.delusionz.xyz/movies/flixhq";
-const mysubsApi = "https://mysubs-api.vercel.app"
+const mysubsApi = "https://mysubs-api.vercel.app";
 
 // multiple api keys to avoid hitting the daily limit of 3000
 let imdb_keys = ["b5cff164", "89a9f57d", "73a9858a"];
@@ -307,13 +307,13 @@ async function displayMovieDetails(imdb_id) {
 function addHistory(details, type, season, episode) {
   const history = JSON.parse(localStorage.getItem("history"));
   const currentDate = new Date();
-  const datetime = currentDate.toLocaleTimeString();
+  const datetime = currentDate.toLocaleString();
 
   const exist = history.filter(function (el) {
     return el.id == imdb_id;
   });
 
-  // if entry exist in history
+  // if entry does not exist in history
   if (exist.length == 0) {
     const new_entry = {
       title: details.Title,
@@ -330,6 +330,7 @@ function addHistory(details, type, season, episode) {
     localStorage.setItem("history", JSON.stringify(history));
   } else {
     // update current history item with updated values
+    const history = JSON.parse(localStorage.getItem("history"));
     const index = history.findIndex((x) => x.id == imdb_id);
     history[index].time = datetime;
     history[index].season = season;
@@ -350,21 +351,34 @@ function removeHistory(id) {
 
 // get arabic subtitles for movies and tv-shows
 async function get_sub(imdb_id) {
-  const season_select = document.getElementById('seasons-selector')
-  const episode_select = document.getElementById('episodes-selector')
-  let text
+  const season_select = document.getElementById("seasons-selector");
+  const episode_select = document.getElementById("episodes-selector");
+  let subtitles;
+  const links = [];
 
   if (season_select) {
-    const season = String((season_select.selectedIndex) + 1).padStart(2, 0)
-    const episode = String((episode_select.selectedIndex) + 1).padStart(2, 0)
-    text = await get_body(`${mysubsApi}/search/${imdb_id}?lang=Arabic&s=${season}&e=${episode}`);
+    const season = String(season_select.selectedIndex + 1).padStart(2, 0);
+    const episode = String(episode_select.selectedIndex + 1).padStart(2, 0);
+    subtitles = await get_body(
+      `${mysubsApi}/search/${imdb_id}?lang=Arabic&s=${season}&e=${episode}`
+    );
   } else {
-    text = await get_body(`${mysubsApi}/search/${imdb_id}?lang=Arabic`);
+    subtitles = await get_body(`${mysubsApi}/search/${imdb_id}?lang=Arabic`);
+  }
+  
+  subtitles = JSON.parse(subtitles)
+  console.log(subtitles.length)
+  for (var i = 0; i < subtitles.length; i++) {
+    links.push({
+      src: `${mysubsApi}/get/${subtitles[i].id}`,
+      kind: "captions",
+      label: `Arabic-${i + 1} (mysubs)`,
+    })
+    
   }
 
-  text = text.replace(/,/g, '.')
-  const vttBlob = new Blob([text.trim()], { type: "text/plain" });
-  return URL.createObjectURL(vttBlob);
+  // it return an array of subtitle links
+  return links
 }
 
 async function get_body(url) {
@@ -521,16 +535,13 @@ async function display_video(episodeId, mediaId) {
 
   player.landscapeFullscreen();
 
-  const vttURL = await get_sub(imdb_id);
-  if (vttURL != "") {
-    arCaption = {
-      src: vttURL,
-      kind: "captions",
-      label: "ALT-arabic",
-    };
-    player.addRemoteTextTrack(arCaption);
+  // add arabic subtitles from mysubs-api
+  const subtitles = await get_sub(imdb_id);
+  for (var i = 0; i < subtitles.length; i++) {
+    player.addRemoteTextTrack(subtitles[i]);
   }
 
+  const history = JSON.parse(localStorage.getItem("history"));
   const index = history.findIndex((x) => x.id == imdb_id);
   const timestamp = history[index].timestamp;
 
