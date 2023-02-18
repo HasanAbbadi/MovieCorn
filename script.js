@@ -134,6 +134,7 @@ function LightenDarkenColor(color, amount) {
 function loadHistory() {
   historyGrid.innerHTML = "";
 
+  const history = JSON.parse(localStorage.getItem("history"));
   let i = 0;
   history.forEach((movie) => {
     i += 1;
@@ -157,9 +158,7 @@ function loadHistory() {
     }</span>
             ${movie.progress == undefined ? "" : progressDiv}
       </div>
-            <div class="remove-history" onClick="removeHistory('${
-              movie.id
-            }')">X</div>
+            <div class="remove-history" onClick="removeHistory('${movie.id}')">X</div>
       </div>
       `;
   });
@@ -341,10 +340,10 @@ function addHistory(details, type, season, episode) {
 
 function removeHistory(id) {
   window.event.stopPropagation();
-  history = history.filter(function (el) {
+  const remaining_items = history.filter(function (el) {
     return el.id != id;
   });
-  localStorage.setItem("history", JSON.stringify(history));
+  localStorage.setItem("history", JSON.stringify(remaining_items));
 
   loadHistory();
 }
