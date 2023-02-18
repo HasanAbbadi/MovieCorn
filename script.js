@@ -365,20 +365,19 @@ async function get_sub(imdb_id) {
   } else {
     subtitles = await get_body(`${mysubsApi}/search/${imdb_id}?lang=Arabic`);
   }
-  
-  subtitles = JSON.parse(subtitles)
-  console.log(subtitles.length)
+
+  subtitles = JSON.parse(subtitles);
+  console.log(subtitles.length);
   for (var i = 0; i < subtitles.length; i++) {
     links.push({
       src: `${mysubsApi}/get/${subtitles[i].id}`,
       kind: "captions",
       label: `Arabic-${i + 1} (mysubs)`,
-    })
-    
+    });
   }
 
   // it return an array of subtitle links
-  return links
+  return links;
 }
 
 async function get_body(url) {
@@ -494,21 +493,22 @@ async function display_video(episodeId, mediaId) {
     `;
   }
 
-  console.log(sources);
-  let captions = [];
+  const subtitles = await get_sub(imdb_id);
+
   let languages = ["Arabic", "Spanish", "English", "German"];
   for (let i = 0; i < json.subtitles.length; i++) {
     let caption = json.subtitles[i];
-    console.log(languages.find((x) => caption.lang.startsWith(x)));
     if (languages.find((x) => caption.lang.startsWith(x))) {
-      captions.push({
+      subtitles.push({
         src: caption.url,
         kind: "captions",
         label: caption.lang,
+        default: true,
       });
     }
   }
 
+  console.log(sources);
   let options = {
     controlBar: {
       children: [
@@ -527,7 +527,7 @@ async function display_video(episodeId, mediaId) {
     html5: { nativeTextTracks: false },
     vhs: { overrideNative: true },
     sources: sources,
-    tracks: captions,
+    tracks: subtitles,
   };
 
   const video_el = document.getElementById("video_1");
@@ -535,13 +535,14 @@ async function display_video(episodeId, mediaId) {
   const player = videojs(video_el, options);
 
   player.landscapeFullscreen();
+  player.volume(0.5);
+  player.hotkeys({
+    volumeStep: 0.1,
+    seekStep: 10,
+    enableModifiersForNumbers: false,
+  });
 
   // add arabic subtitles from mysubs-api
-  const subtitles = await get_sub(imdb_id);
-  for (var i = 0; i < subtitles.length; i++) {
-    player.addRemoteTextTrack(subtitles[i]);
-  }
-
   const history = JSON.parse(localStorage.getItem("history"));
   const index = history.findIndex((x) => x.id == imdb_id);
   const timestamp = history[index].timestamp;
