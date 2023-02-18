@@ -384,6 +384,7 @@ input.dynamic:checked + div:before {
 
 .history-item {
   display: flex;
+  max-width: 350px;
 }
 
 .details {
