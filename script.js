@@ -464,6 +464,7 @@ async function watch_series(title, details) {
   on_episode_change();
 
   document.getElementById("watch-button").addEventListener("click", () => {
+    on_episode_change();
     display_video(episode_id, media_id);
     se_selected = season_select.options[season_select.selectedIndex].text;
     ep_selected = episode_select.options[episode_select.selectedIndex].text;
