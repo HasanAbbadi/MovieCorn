@@ -540,6 +540,7 @@ async function display_video(episodeId, mediaId) {
 
   console.log(sources);
   let options = {
+    playbackRates: [0.5, 1, 1.5, 2],
     controlBar: {
       volumePanel: {
         inline: false,
@@ -554,6 +555,7 @@ async function display_video(episodeId, mediaId) {
         "timeDivider",
         "durationDisplay",
         "volumePanel",
+        "playbackRateMenuButton",
         "captionsButton",
         "qualitySelector",
         "fullscreenToggle",

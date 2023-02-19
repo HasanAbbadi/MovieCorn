@@ -73,15 +73,21 @@
 }
 
 .video-js .vjs-volume-panel {
+  right: 112px;
+}
+
+
+.video-js .vjs-playback-rate-menu-button {
+  display: block;
+  position: absolute;
+}
+
+.video-js .vjs-playback-rate {
   right: 84px;
 }
 
 .video-js .vjs-captions-button {
   right: 56px;
-}
-
-.video-js .vjs-playback-rate {
-  right: 28px;
 }
 
 .video-js .vjs-quality-selector {
