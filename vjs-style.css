@@ -38,11 +38,18 @@
 .video-js .vjs-load-progress {
   height: 8px;
 }
+
 .video-js .vjs-play-progress:before {
   font-size: 12px;
   top: -2px;
   text-shadow: 0 0 2px black;
 }
+
+.video-js .vjs-progress-holder:hover .vjs-play-progress:before {
+  font-size: 14px;
+  top: -4px;
+}
+
 .video-js .vjs-current-time {
   display: block;
   left: 35px;
@@ -83,4 +90,12 @@
 
 .video-js .vjs-fullscreen-control {
   right: 0;
+}
+
+.video-js .vjs-text-track-display > div > div > div{ 
+	background: rgba(0, 0, 0, 0.35) !important;
+  padding: 5px;
+	text-shadow: 1px 1px 3px #000000 !important;
+	display: inline-block !important;
+  border-radius: 10px;;
 }
