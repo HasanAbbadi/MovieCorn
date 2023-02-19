@@ -525,7 +525,6 @@ async function display_video(episodeId, mediaId) {
   }
 
   const subtitles = await get_sub(imdb_id);
-
   let languages = ["English", `${subLang}`];
   const filtered = json.subtitles.filter((x) => {
     return languages.find((y) => x.lang.startsWith(y));
