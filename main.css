@@ -2,16 +2,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;500;600;700;800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Tajawal&display=swap");
 
-@font-face {
-  font-family: "VideoJS";
-  src: url("https://fonts.googleapis.com/css2?family=Tajawal&display=swap");
-  src: url("https://vjs.zencdn.net/f/1/vjs.eot");
-  src: url("https://vjs.zencdn.net/f/1/vjs.eot?#iefix")
-      format("embedded-opentype"),
-    url("https://vjs.zencdn.net/f/1/vjs.woff") format("woff"),
-    url("https://vjs.zencdn.net/f/1/vjs.ttf") format("truetype");
-}
-
 :root {
   --md-background-color: #1d1d1d;
   --background-color: #171717;
@@ -30,17 +20,8 @@
   --shadow-color: lightgray;
 }
 
+
 /* Change all text and icon colors in the player. */
-.video-js .vjs-play-progress,
-.video-js .vjs-volume-level {
-  background-color: var(--primary-color);
-}
-
-.video-js .vjs-time-control {
-  display: block;
-  padding-left: 0rem;
-}
-
 * {
   padding: 0;
   margin: 0;
@@ -247,6 +228,17 @@ input.dynamic:checked + div:before {
 
 #logo-container img {
   max-width: 50px;
+}
+
+.lang-select-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.lang-select-wrapper select {
+  border-radius: 10px;
 }
 
 .search-element {
@@ -456,7 +448,7 @@ input.dynamic:checked + div:before {
   max-width: 300px;
   margin: 0 auto;
   border-radius: 10px 10px;
-  box-shadow: 1px 5px 10px var(--shadow-color);
+  box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.3);
 }
 
 .movie-info {
@@ -568,7 +560,7 @@ input.dynamic:checked + div:before {
   color: black;
 }
 
-#watch-grid select {
+select {
   background: var(--md-background-color);
   color: var(--primary-color);
   text-shadow: 0.4px 0px 0.5px grey;

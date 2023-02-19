@@ -1,6 +1,7 @@
 // Titles: https://omdbapi.com/?s=thor&page=1&apikey=${api_key}
 // details: http://www.omdbapi.com/?i=tt3896198&apikey=${api_key}
 
+// Document elements
 const root = document.documentElement;
 const movieSearchBox = document.getElementById("movie-search-box");
 const historyGrid = document.getElementById("history-grid");
@@ -9,8 +10,10 @@ const resultGrid = document.getElementById("result-grid");
 const videoGrid = document.getElementById("video-grid");
 let watchGrid;
 
+// Settings elements
 const themeSwitch = document.getElementById("theme-checkbox");
 const dynamicSwitch = document.getElementById("dynamic-checkbox");
+const langSelector = document.getElementById("language-selector");
 
 // The apis I'll be using
 const omdb_api = "https://omdbapi.com";
@@ -27,7 +30,7 @@ if (history == null) {
   localStorage.setItem("history", JSON.stringify([]));
 }
 
-// current theme and if dynamic is true
+// check if preferences are saved if not null
 const currentTheme = localStorage.getItem("theme")
   ? localStorage.getItem("theme")
   : null;
@@ -36,7 +39,11 @@ const isDynamic = localStorage.getItem("dynamic")
   ? localStorage.getItem("dynamic")
   : null;
 
-// check the corresponding checkbox
+let subLang = localStorage.getItem("language")
+  ? localStorage.getItem("language")
+  : null;
+
+// always select the value from localstorage if it exists
 if (currentTheme) {
   document.documentElement.setAttribute("data-theme", currentTheme);
   if (currentTheme == "light") {
@@ -48,6 +55,11 @@ if (isDynamic == true) {
   dynamicSwitch.checked = true;
 }
 
+if (subLang) {
+  langSelector.value = subLang;
+}
+
+// when switch is checked change to the selected theme
 function switchTheme(e) {
   if (e.target.checked) {
     document.documentElement.setAttribute("data-theme", "light");
@@ -58,6 +70,7 @@ function switchTheme(e) {
   }
 }
 
+// *NOTE: note working; rn.
 function switchDynamic(e) {
   if (e.target.checked) {
     localStorage.setItem("dynamic", true);
@@ -66,8 +79,14 @@ function switchDynamic(e) {
   }
 }
 
+function switchLanguage(e) {
+  subLang = e.target.value;
+  localStorage.setItem("language", subLang);
+}
+
 themeSwitch.addEventListener("change", switchTheme, false);
 dynamicSwitch.addEventListener("change", switchDynamic, false);
+langSelector.addEventListener("change", switchLanguage);
 
 // index.html?id={value}
 const imdb_id = findGetParameter("id");
@@ -92,6 +111,7 @@ function findGetParameter(parameterName) {
   return result;
 }
 
+// change root properties to poster average color
 async function material_you(img, theme) {
   if (dynamicSwitch.checked == true) {
     return;
@@ -131,6 +151,7 @@ function LightenDarkenColor(color, amount) {
   );
 }
 
+// load and display history items from localstorage
 function loadHistory() {
   historyGrid.innerHTML = "";
 
@@ -158,12 +179,15 @@ function loadHistory() {
     }</span>
             ${movie.progress == undefined ? "" : progressDiv}
       </div>
-            <div class="remove-history" onClick="removeHistory('${movie.id}')">X</div>
+            <div class="remove-history" onClick="removeHistory('${
+              movie.id
+            }')">X</div>
       </div>
       `;
   });
 }
 
+// search the api for user input after done typing
 function findMovies() {
   //on keyup, start the countdown
   let typingTimer; //timer identifier
@@ -176,6 +200,7 @@ function findMovies() {
   });
 }
 
+// show or hide the search results
 function search_list() {
   let searchTerm = movieSearchBox.value.trim();
   if (searchTerm.length > 0) {
@@ -194,6 +219,7 @@ async function loadMovies(searchTerm) {
   if (data.Response == "True") displayMovieList(data.Search);
 }
 
+// display search results
 function displayMovieList(movies) {
   searchList.innerHTML = "";
   for (let idx = 0; idx < movies.length; idx++) {
@@ -355,14 +381,20 @@ async function get_sub(imdb_id) {
   let subtitles;
   const links = [];
 
+  if (subLang == null) {
+    subLang = "Arabic";
+  }
+
   if (season_select) {
     const season = String(season_select.selectedIndex + 1).padStart(2, 0);
     const episode = String(episode_select.selectedIndex + 1).padStart(2, 0);
     subtitles = await get_body(
-      `${mysubsApi}/search/${imdb_id}?lang=Arabic&s=${season}&e=${episode}`
+      `${mysubsApi}/search/${imdb_id}?lang=${subLang}&s=${season}&e=${episode}`
     );
   } else {
-    subtitles = await get_body(`${mysubsApi}/search/${imdb_id}?lang=Arabic`);
+    subtitles = await get_body(
+      `${mysubsApi}/search/${imdb_id}?lang=${subLang}`
+    );
   }
 
   subtitles = JSON.parse(subtitles);
@@ -371,7 +403,7 @@ async function get_sub(imdb_id) {
     links.push({
       src: `${mysubsApi}/get/${subtitles[i].id}`,
       kind: "captions",
-      label: `Arabic-${i + 1} (mysubs)`,
+      label: `${subLang}-${i + 1} (mysubs)`,
     });
   }
 
@@ -476,7 +508,7 @@ async function display_video(episodeId, mediaId) {
   );
 
   const json = await watchLink.json();
-  videoGrid.innerHTML = `<video id="video_1" class="video-js vjs-matrix"></video><br>
+  videoGrid.innerHTML = `<video id="video_1" class="video-js"></video><br>
     <div style="display:flex;justify-content:space-between"><code>Download M3u8:</code><code>ffmpeg -i "https://...m3u8?..." output.mp4</code></div>`;
 
   let sources = [];
@@ -494,26 +526,32 @@ async function display_video(episodeId, mediaId) {
 
   const subtitles = await get_sub(imdb_id);
 
-  let languages = ["Arabic", "Spanish", "English", "German"];
-  for (let i = 0; i < json.subtitles.length; i++) {
-    let caption = json.subtitles[i];
-    if (languages.find((x) => caption.lang.startsWith(x))) {
-      subtitles.push({
-        src: caption.url,
-        kind: "captions",
-        label: caption.lang,
-        default: true,
-      });
-    }
+  let languages = ["English", `${subLang}`];
+  const filtered = json.subtitles.filter((x) => {
+    return languages.find((y) => x.lang.startsWith(y));
+  });
+  for (let i = 0; i < filtered.length; i++) {
+    subtitles.push({
+      src: filtered[i].url,
+      kind: "captions",
+      label: filtered[i].lang,
+    });
   }
 
   console.log(sources);
   let options = {
     controlBar: {
+      volumePanel: {
+        inline: false,
+        volumeControl: {
+          vertical: true,
+        },
+      },
       children: [
         "playToggle",
-        "currentTimeDisplay",
         "progressControl",
+        "currentTimeDisplay",
+        "timeDivider",
         "durationDisplay",
         "volumePanel",
         "captionsButton",
@@ -523,16 +561,14 @@ async function display_video(episodeId, mediaId) {
     },
     controls: true,
     fluid: true,
-    html5: { nativeTextTracks: false },
-    vhs: { overrideNative: true },
     sources: sources,
     tracks: subtitles,
   };
 
   const video_el = document.getElementById("video_1");
-
   const player = videojs(video_el, options);
 
+  // player settings and plugins
   player.landscapeFullscreen();
   player.volume(0.5);
   player.hotkeys({
@@ -540,6 +576,38 @@ async function display_video(episodeId, mediaId) {
     seekStep: 10,
     enableModifiersForNumbers: false,
   });
+  player.mobileUi({
+    touchControls: {
+      seekSeconds: 10,
+      tapTimeout: 300,
+      disableOnEnd: false,
+    },
+  });
+
+  // Makes progress bar draggable.
+  const SeekBar = videojs.getComponent("SeekBar");
+
+  SeekBar.prototype.getPercent = function getPercent() {
+    const time = this.player_.currentTime();
+    const percent = time / this.player_.duration();
+    return percent >= 1 ? 1 : percent;
+  };
+
+  SeekBar.prototype.handleMouseMove = function handleMouseMove(event) {
+    let newTime = this.calculateDistance(event) * this.player_.duration();
+    if (newTime === this.player_.duration()) {
+      newTime = newTime - 0.1;
+    }
+    this.player_.currentTime(newTime);
+    this.update();
+    let currentTime = player.currentTime();
+    let minutes = Math.floor(currentTime / 60);
+    let seconds = Math.floor(currentTime - minutes * 60);
+    let x = minutes < 10 ? "0" + minutes : minutes;
+    let y = seconds < 10 ? "0" + seconds : seconds;
+    let format = x + ":" + y;
+    player.controlBar.currentTimeDisplay.el_.innerHTML = format;
+  };
 
   // add arabic subtitles from mysubs-api
   const history = JSON.parse(localStorage.getItem("history"));

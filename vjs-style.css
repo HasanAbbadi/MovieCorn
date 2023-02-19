@@ -1,103 +1,86 @@
-.video-js .vjs-menu-button-inline.vjs-slider-active,.video-js .vjs-menu-button-inline:focus,.video-js .vjs-menu-button-inline:hover,.video-js.vjs-no-flex .vjs-menu-button-inline {
-    width: 10em
+@import url("./main.css");
+
+.video-js .vjs-play-progress,
+.video-js .vjs-volume-level {
+  background-color: var(--primary-color);
 }
 
-.video-js .vjs-controls-disabled .vjs-big-play-button {
-    display: none!important
-}
-
-.video-js .vjs-control {
-    width: 3em
-}
-
-.video-js .vjs-menu-button-inline:before {
-    width: 1.5em
-}
-
-.vjs-menu-button-inline .vjs-menu {
-    left: 3em
-}
-
-.vjs-paused.vjs-has-started.video-js .vjs-big-play-button,.video-js.vjs-ended .vjs-big-play-button,.video-js.vjs-paused .vjs-big-play-button {
-    display: block
-}
-
-.video-js .vjs-load-progress div,.vjs-seeking .vjs-big-play-button,.vjs-waiting .vjs-big-play-button {
-    display: none!important
-}
-
-.video-js .vjs-mouse-display:after,.video-js .vjs-play-progress:after {
-    padding: 0 .4em .3em !important
-}
-
-.video-js.vjs-ended .vjs-loading-spinner {
-    display: none;
-}
-
-.video-js.vjs-ended .vjs-big-play-button {
-    display: block !important;
-}
-
-video-js.vjs-ended .vjs-big-play-button,.video-js.vjs-paused .vjs-big-play-button,.vjs-paused.vjs-has-started.video-js .vjs-big-play-button {
-    display: block
-}
-
-.video-js .vjs-big-play-button {
-    top: 50%;
-    left: 50%;
-    margin-left: -1.5em;
-    margin-top: -1em
-}
-
-.video-js .vjs-big-play-button {
-    background-color: rgba(0,0,0,0.35);
-    font-size: 3.5em;
-    border-radius: 50%;
-    height: 2em !important;
-    line-height: 2em !important;
-    margin-top: -1em !important
-}
-
-.video-js:hover .vjs-big-play-button,.video-js .vjs-big-play-button:focus,.video-js .vjs-big-play-button:active {
-    background-color: rgba(0,0,0,0.35)
-}
-
-.video-js .vjs-loading-spinner {
-    border-color: rgba(255,255,255,0.7)
-}
-
-.video-js .vjs-control-bar2 {
-    background-color: transparent
+.vjs-fluid {
+  overflow: hidden;
 }
 
 .video-js .vjs-control-bar {
-    background-color: rgba(0,0,0,0) !important;
-    color: #ffffff;
-    font-size: 12px
+  display: block;
+  background-color: var(--light-background-color);
+  opacity: 0.95;
+  color: var(--primary-color)
 }
 
-.video-js .vjs-big-play-button {
-    height: 2em !important;
-    width: 2em !important;
-    line-height: 1.9em !important;
-    margin-top: -1em !important;
-    margin-left: -1em;
-    border-width: 3px
+.video-js .vjs-control {
+  position: absolute;
 }
 
-.video-js .vjs-icon-play:before, .video-js .vjs-big-play-button:before {
-    font-size: 50px;
+.video-js .vjs-progress-control {
+  bottom: 28px;
+  left: 0;
+  height: 10px;
+  width: 100%;
+  background-color: var(--background-color);
 }
-
-.video-js  .vjs-progress-holder {
-    font-size: 1.7em;
-    border-radius: 10px;
+.video-js .vjs-progress-holder {
+  position: absolute;
+  left: -10px;
+  margin: 0;
+  height: 8px;
+  width: 100%;
 }
-
-.video-js .vjs-progress-holder .vjs-play-progress, .video-js .vjs-progress-holder .vjs-load-progress, .video-js .vjs-progress-holder .vjs-load-progress div, .video-js .vjs-slider,.vjs-volume-level {
-    border-radius: 10px;
-}
-
+.video-js .vjs-play-progress,
 .video-js .vjs-load-progress {
-    background: rgba(255,255,255,0.5);
+  height: 8px;
+}
+.video-js .vjs-play-progress:before {
+  font-size: 12px;
+  top: -2px;
+  text-shadow: 0 0 2px black;
+}
+.video-js .vjs-current-time {
+  display: block;
+  left: 35px;
+}
+.video-js .vjs-time-divider {
+  position: absolute;
+  display: block;
+  bottom: 0;
+  left: 70px;
+}
+
+.video-js .vjs-duration {
+  display: block;
+  left: 80px;
+}
+
+.video-js .vjs-volume-control {
+  right: 0 !important;
+  left: 0 !important;
+  background-color: var(--light-background-color);
+}
+
+.video-js .vjs-volume-panel {
+  right: 84px;
+}
+
+.video-js .vjs-captions-button {
+  right: 56px;
+}
+
+.video-js .vjs-playback-rate {
+  right: 28px;
+}
+
+.video-js .vjs-quality-selector {
+  right: 28px;
+}
+
+.video-js .vjs-fullscreen-control {
+  right: 0;
 }
