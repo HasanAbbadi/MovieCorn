@@ -418,6 +418,9 @@ async function get_body(url) {
 }
 
 async function watch_movie(title, year) {
+  const history = JSON.parse(localStorage.getItem("history"));
+  const index = history.findIndex((x) => x.id == imdb_id);
+
   const result = await fetch(`${consumetapi}/${title}`);
   const movieDetails = await result.json();
 
@@ -434,6 +437,9 @@ async function watch_movie(title, year) {
 }
 
 async function watch_series(title, details) {
+  const history = JSON.parse(localStorage.getItem("history"));
+  const index = history.findIndex((x) => x.id == imdb_id);
+
   const result = await fetch(`${consumetapi}/${title}`);
   const movieDetails = await result.json();
 
@@ -492,6 +498,33 @@ async function watch_series(title, details) {
   watchGrid.appendChild(watch_button);
   on_season_change();
   on_episode_change();
+
+  // automatically select the last watched episode
+  if (history[index]) {
+    if (history[index].season) {
+      for (var i = 0; i < season_select.options.length; i++) {
+        if (season_select.options[i].text == history[index].season) {
+          season_select.selectedIndex = i;
+          break;
+        }
+      }
+      on_season_change();
+      on_episode_change();
+      for (var i = 0; i < episode_select.options.length; i++) {
+        if (episode_select.options[i].text === history[index].episode) {
+          episode_select.selectedIndex = i;
+          break;
+        }
+      }
+      // if the episode is nearly done automatically select the next one
+      // but only if it is not the last episode in season
+      if (history[index].progress >= 95) {
+        if (episode_select.options.length - 1 != episode_select.selectedIndex) {
+          episode_select.selectedIndex = episode_select.selectedIndex + 1;
+        }
+      }
+    }
+  }
 
   document.getElementById("watch-button").addEventListener("click", () => {
     on_episode_change();
