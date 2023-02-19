@@ -1,18 +1,20 @@
-<h1>🌽 MovieCorn</h1>
+<h1>MovieCorn 🌽</h1>
 
-**⚠️ Warning: This site doesn't host any videos. If you have any legal issues with the videos, contact the original sources.**
+* **Disclaimer: This site doesn't host any videos. If you have any legal issues with the videos, contact the original sources.**
 
 Streaming Site with no Ads.
 
 
-## 📖 Features:
+## Features:
 
-✅ 1080p quality ⭐    
-✅ Multiple Languages for Subtitles 🗣    
-✅ No Extra Permissions Needed 🚫      
-✅ No Account Needed 🚫     
-✅ No Ads 🚫       
-✅ Light & Dark Themes   
-✅ Dynamic Theme        
-✅ Pick Up Where You Left Off        
-⬛ Latest Movies, Series & Anime        
+- [x] 1080p quality ⭐    
+- [x] Multiple Languages for Subtitles 🗣     
+- [x] No Account Needed    
+- [x] No Ads      
+- [x] Light & Dark Themes   
+- [x] Dynamic Theme        
+- [x] Pick Up Where You Left Off        
+- [ ] Latest Movies, Series & Anime        
+
+## Contribution:
+If you have any questions or features you'd like to add, please feel free to open an issue or a pull request.
