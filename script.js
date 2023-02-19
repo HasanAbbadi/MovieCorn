@@ -525,6 +525,7 @@ async function display_video(episodeId, mediaId) {
   }
 
   const subtitles = await get_sub(imdb_id);
+
   let languages = ["English", `${subLang}`];
   const filtered = json.subtitles.filter((x) => {
     return languages.find((y) => x.lang.startsWith(y));
@@ -601,13 +602,6 @@ async function display_video(episodeId, mediaId) {
     }
     this.player_.currentTime(newTime);
     this.update();
-    let currentTime = player.currentTime();
-    let minutes = Math.floor(currentTime / 60);
-    let seconds = Math.floor(currentTime - minutes * 60);
-    let x = minutes < 10 ? "0" + minutes : minutes;
-    let y = seconds < 10 ? "0" + seconds : seconds;
-    let format = x + ":" + y;
-    player.controlBar.currentTimeDisplay.el_.innerHTML = format;
   };
 
   // add arabic subtitles from mysubs-api
