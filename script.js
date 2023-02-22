@@ -25,7 +25,7 @@ let imdb_keys = ["b5cff164", "89a9f57d", "73a9858a"];
 const api_key = imdb_keys[Math.floor(Math.random() * imdb_keys.length)]; //random api key
 
 // initailize history and create if not exist
-const history = JSON.parse(localStorage.getItem("history"));
+let history = JSON.parse(localStorage.getItem("history"));
 if (history == null) {
   localStorage.setItem("history", JSON.stringify([]));
 }
@@ -637,14 +637,37 @@ async function display_video(episodeId, mediaId) {
     this.update();
   };
 
-  // add arabic subtitles from mysubs-api
-  const history = JSON.parse(localStorage.getItem("history"));
-  const index = history.findIndex((x) => x.id == imdb_id);
+  // save previous timestamp data.
+  const episode_select = document.getElementById("episodes-selector");
+  let previousEpisode;
+  let index = history.findIndex((x) => x.id == imdb_id);
+
+  if (history[index]) {
+    if (history[index].episode) {
+      previousEpisode = history[index].episode;
+    }
+  }
+
+  // redeclare history to get the updated data.
+  history = JSON.parse(localStorage.getItem("history"));
+  index = history.findIndex((x) => x.id == imdb_id);
   const timestamp = history[index].timestamp;
 
-  // jump to saved timestamp
   if (timestamp) {
-    player.currentTime(timestamp);
+    // If it is a series check if current selected episode is the same as in history
+    // This is done to avoid jumping to previous episode timestamp.
+    if (episode_select) {
+      const ep_selected =
+        episode_select.options[episode_select.selectedIndex].text;
+      if (ep_selected == previousEpisode) {
+        player.currentTime(timestamp);
+      } else {
+        history[index].timestamp = 0;
+      }
+      // If it is a movie always jump to timestamp
+    } else {
+      player.currentTime(timestamp);
+    }
   }
 
   // save the timestamp through DB polling (every 20s)
