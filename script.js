@@ -315,9 +315,21 @@ async function displayMovieDetails(imdb_id) {
 
   document.getElementsByClassName("wrapper")[0].style.visibility = "visible";
   watchGrid = document.getElementById("watch-grid");
+  if (screen.width <= 500) {
+    if (watchGrid) {
+      watchGrid.style.transform = "translateY(100px)";
+      watchGrid.addEventListener("click", (e) => {
+        if (watchGrid.style.transform == "translateY(100px)") {
+          watchGrid.style.transform = "translateY(0)";
+        } else {
+          watchGrid.style.transform = "translateY(100px)";
+        }
+      });
+    }
+  }
 
   if (details.Type == "movie") {
-    watchGrid.innerHTML = `<button id="watch-movie">Watch</button>`;
+    watchGrid.innerHTML = `<button id="watch-movie"><i class="fa fa-play"></i></button>`;
     const watchButton = document.getElementById("watch-movie");
 
     watchButton.addEventListener("click", () => {
@@ -374,7 +386,7 @@ function removeHistory(id) {
   loadHistory();
 }
 
-// get arabic subtitles for movies and tv-shows
+// get subtitles for movies and tv-shows from mysubs-api
 async function get_sub(imdb_id) {
   const season_select = document.getElementById("seasons-selector");
   const episode_select = document.getElementById("episodes-selector");
@@ -489,8 +501,19 @@ async function watch_series(title, details) {
     episode_id = episode_select.value;
   }
 
+  preventAction(episode_select);
+  preventAction(season_select);
+
+  function preventAction(element) {
+    element.addEventListener('click', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      e.stopImmediatePropagation()
+    })
+  }
+
   const watch_button = document.createElement("button");
-  watch_button.innerHTML = "Watch";
+  watch_button.innerHTML = "<i class='fa fa-play'></i>";
   watch_button.id = "watch-button";
 
   watchGrid.appendChild(season_select);
@@ -618,6 +641,9 @@ async function display_video(episodeId, mediaId) {
       disableOnEnd: false,
     },
   });
+
+  // scroll to the end of the page
+  window.scrollTo({ left: 0, top: document.body.scrollHeight, behavior: "smooth" });
 
   // Makes progress bar draggable.
   const SeekBar = videojs.getComponent("SeekBar");

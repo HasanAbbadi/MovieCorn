@@ -20,8 +20,6 @@
   --shadow-color: lightgray;
 }
 
-
-/* Change all text and icon colors in the player. */
 * {
   padding: 0;
   margin: 0;
@@ -29,16 +27,18 @@
   box-sizing: border-box;
 }
 
-h3.movie-title,
-.logo .container span {
-  /*text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;*/
-  text-shadow: -1px 1px 2px black;
-}
-
 body {
   font-family: "Lato", sans-serif;
   color: var(--text-color);
   background-color: var(--background-color);
+  transition: scroll 0.15s;
+  transition-timing-function: ease-in;
+}
+
+h3.movie-title,
+.logo .container span {
+  /*text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;*/
+  text-shadow: -1px 1px 2px black;
 }
 
 a {
@@ -230,17 +230,6 @@ input.dynamic:checked + div:before {
   max-width: 50px;
 }
 
-.lang-select-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-}
-
-.lang-select-wrapper select {
-  border-radius: 10px;
-}
-
 .search-element {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -376,7 +365,6 @@ input.dynamic:checked + div:before {
 
 .history-item {
   display: flex;
-  max-width: 350px;
 }
 
 .details {
@@ -448,7 +436,7 @@ input.dynamic:checked + div:before {
   max-width: 300px;
   margin: 0 auto;
   border-radius: 10px 10px;
-  box-shadow: 0px 0px 30px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: 1px 5px 10px var(--shadow-color);
 }
 
 .movie-info {
@@ -535,6 +523,7 @@ input.dynamic:checked + div:before {
   align-items: center;
   justify-content: flex-start;
   padding-top: 20px;
+  z-index: 1;
 }
 
 #watch-grid * {
@@ -543,12 +532,18 @@ input.dynamic:checked + div:before {
   border: 1px;
   border-radius: 10px 10px;
   margin: 5px 10px 5px 0px;
+  z-index: 3
 }
 
 #watch-grid button {
   background-color: var(--primary-color);
   color: var(--background-color);
   cursor: pointer;
+  border-radius: 10px;
+  width: 60px;
+  height: 30px;
+  padding: 0;
+  text-align: center;
 }
 
 #watch-grid button:hover {
@@ -560,7 +555,7 @@ input.dynamic:checked + div:before {
   color: black;
 }
 
-select {
+#watch-grid select {
   background: var(--md-background-color);
   color: var(--primary-color);
   text-shadow: 0.4px 0px 0.5px grey;
@@ -609,7 +604,7 @@ select {
   }
 
   .movie-info {
-    margin-top: -10%;
+    margin-top: -30%;
   }
 
   .movie-misc-info {
@@ -625,8 +620,71 @@ select {
     -webkit-mask-image: linear-gradient(black, transparent);
   }
 
+  #result-grid {
+    padding-bottom: 10px;
+  }
+
+  #video-grid {
+    padding-bottom: 10px;
+  }
+
   #watch-grid {
-    flex-direction: column;
+    position:fixed;
+    background-color: var(--light-background-color);
+    width: 100%;
+    height: 130px;
+    bottom:-1px;
+    right:0px;
+    border-radius: 20px 20px 0px 0px;
+    text-align: center;
+    box-shadow: 0px 0px 2px black;
+    transition: transform 0.3s;
+    transition-timing-function:cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  }
+
+  #watch-grid::before {
+    content: '';
+    position: absolute;
+    bottom: 115px;
+    text-align: center;
+    width: 60px;
+    height: 5px;
+    background-color: var(--text-color);
+    border-radius: 10px;
+  }
+
+  #watch-grid select {
+    position: fixed;
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    font-weight: 600;
+    box-shadow: 0px 0px 5px black;
+    width: 200px;
+    left: 20px;
+  }
+
+  #watch-grid #seasons-selector {
+    bottom: 50px;
+  }
+
+  #watch-grid #episodes-selector {
+    bottom: 10px;
+  }
+
+  #watch-grid button {
+    position: fixed;
+    right: 15px;
+    bottom: 15px;
+    width: 65px;
+    height: 65px;
+    border-radius: 50px;
+    text-align: center;
+    box-shadow: 0px 0px 8px var(--shadow-color);
+  }
+
+  #watch-grid button i {
+    padding: 0;
+    margin: 0;
   }
 
   #video-grid {
