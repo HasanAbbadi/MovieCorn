@@ -13,7 +13,7 @@
   display: block;
   background-color: var(--light-background-color);
   opacity: 0.95;
-  color: var(--primary-color)
+  color: var(--primary-color);
 }
 
 .video-js .vjs-control {
@@ -76,7 +76,6 @@
   right: 112px;
 }
 
-
 .video-js .vjs-playback-rate-menu-button {
   display: block;
   position: absolute;
@@ -98,10 +97,55 @@
   right: 0;
 }
 
-.video-js .vjs-text-track-display > div > div > div{ 
-	background: rgba(0, 0, 0, 0.35) !important;
+.video-js .vjs-text-track-display > div > div > div {
+  background: rgba(0, 0, 0, 0.35) !important;
   padding: 5px;
-	text-shadow: 1px 1px 3px #000000 !important;
-	display: inline-block !important;
-  border-radius: 10px;;
+  text-shadow: 1px 1px 3px #000000 !important;
+  display: inline-block !important;
+  border-radius: 10px;
+}
+
+@media (max-height: 450px) {
+  .video-js {
+    font-size: 13px;
+  }
+
+  .video-js .vjs-progress-control {
+    bottom: 38px;
+  }
+
+  .video-js .vjs-current-time {
+    left: 50px;
+  }
+
+  .video-js .vjs-time-divider {
+    left: 85px;
+  }
+
+  .video-js .vjs-duration {
+    left: 100px;
+  }
+
+  .video-js .vjs-progress-holder {
+    height: 10px;
+  }
+  .video-js .vjs-volume-panel {
+    right: 210px;
+  }
+
+  .video-js .vjs-playback-rate {
+    right: 160px;
+  }
+
+  .video-js .vjs-captions-button {
+    right: 110px;
+  }
+
+  .video-js .vjs-quality-selector {
+    right: 60px;
+  }
+
+  .video-js .vjs-fullscreen-control {
+    right: 10px;
+  }
 }
