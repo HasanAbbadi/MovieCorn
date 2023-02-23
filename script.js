@@ -151,6 +151,14 @@ function LightenDarkenColor(color, amount) {
   );
 }
 
+const floatingSearch = document.getElementById("floating-search");
+const searchElement = document.getElementsByClassName("search-container")[0];
+floatingSearch.addEventListener("click", (e) => {
+  searchElement.style.height = "50px";
+  searchElement.style.visibility = "visible";
+  document.getElementById("movie-search-box").focus();
+});
+
 // load and display history items from localstorage
 function loadHistory() {
   historyGrid.innerHTML = "";
@@ -321,8 +329,10 @@ async function displayMovieDetails(imdb_id) {
       watchGrid.addEventListener("click", (e) => {
         if (watchGrid.style.transform == "translateY(100px)") {
           watchGrid.style.transform = "translateY(0)";
+          floatingSearch.style.bottom = "160px";
         } else {
           watchGrid.style.transform = "translateY(100px)";
+          floatingSearch.style.bottom = "60px";
         }
       });
     }
@@ -505,11 +515,11 @@ async function watch_series(title, details) {
   preventAction(season_select);
 
   function preventAction(element) {
-    element.addEventListener('click', (e) => {
-      e.preventDefault()
-      e.stopPropagation()
-      e.stopImmediatePropagation()
-    })
+    element.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+    });
   }
 
   const watch_button = document.createElement("button");
@@ -643,7 +653,11 @@ async function display_video(episodeId, mediaId) {
   });
 
   // scroll to the end of the page
-  window.scrollTo({ left: 0, top: document.body.scrollHeight, behavior: "smooth" });
+  window.scrollTo({
+    left: 0,
+    top: document.body.scrollHeight,
+    behavior: "smooth",
+  });
 
   // Makes progress bar draggable.
   const SeekBar = videojs.getComponent("SeekBar");
