@@ -90,6 +90,7 @@ langSelector.addEventListener("change", switchLanguage);
 
 // index.html?id={value}
 const imdb_id = findGetParameter("id");
+let index = history.findIndex((x) => x.id == imdb_id);
 if (imdb_id == "clear_hist") {
   localStorage.setItem("history", JSON.stringify([]));
 } else if (imdb_id != null) {
@@ -455,22 +456,26 @@ async function watch_movie(title, year) {
   }
 
   const id = match[0].id.split("-").pop();
-  display_video(id, match[0].id);
+  displayVideo(id, match[0].id);
 }
 
 async function watch_series(title, details) {
   const history = JSON.parse(localStorage.getItem("history"));
-  const index = history.findIndex((x) => x.id == imdb_id);
+  let json;
 
-  const result = await fetch(`${consumetapi}/${title}`);
-  const movieDetails = await result.json();
+  // save episodes metadata if two episodes is watched.
+  if (history[index]) {
+    if (history[index].allEp) {
+      json = history[index].allEp;
+    } else {
+      json = await getEpisodes(title);
+      history[index].allEp = {id: json.id, episodes: json.episodes};
+      localStorage.setItem("history", JSON.stringify(history));
+    }
+  } else {
+    json = await getEpisodes(title);
+  }
 
-  const match = movieDetails.results.filter(function (el) {
-    return el.title == title && el.type == "TV Series";
-  });
-
-  const watchLink = await fetch(`${consumetapi}/info?id=${match[0].id}`);
-  const json = await watchLink.json();
   const media_id = json.id;
   const seasons = json.episodes.pop().season;
 
@@ -561,26 +566,67 @@ async function watch_series(title, details) {
 
   document.getElementById("watch-button").addEventListener("click", () => {
     on_episode_change();
-    display_video(episode_id, media_id);
+    displayVideo(episode_id, media_id);
     se_selected = season_select.options[season_select.selectedIndex].text;
     ep_selected = episode_select.options[episode_select.selectedIndex].text;
     addHistory(details, "tv-show", se_selected, ep_selected);
   });
 }
 
-async function display_video(episodeId, mediaId) {
-  const watchLink = await fetch(
-    `${consumetapi}/watch?episodeId=${episodeId}&mediaId=${mediaId}&source=vidcloud`
-  );
+async function getEpisodes(title) {
+  const result = await fetch(`${consumetapi}/${title}`);
+  const movieDetails = await result.json();
 
+  const match = movieDetails.results.filter(function (el) {
+    return el.title == title && el.type == "TV Series";
+  });
+
+  const watchLink = await fetch(`${consumetapi}/info?id=${match[0].id}`);
+  return await watchLink.json();
+}
+
+async function displayVideo(episodeId, mediaId) {
+  const url = `${consumetapi}/watch?episodeId=${episodeId}&mediaId=${mediaId}&source=vidcloud`;
+  const watchLink = await fetch(url);
   const json = await watchLink.json();
+
   videoGrid.innerHTML = `<video id="video_1" class="video-js"></video><br>
     <div style="display:flex;justify-content:space-between"><code>Download M3u8:</code><code>ffmpeg -i "https://...m3u8?..." output.mp4</code></div>`;
 
-  let sources = [];
-  for (let i = 0; i < json.sources.length; i++) {
-    let source = json.sources[i];
-    sources.push({
+  let index = history.findIndex((x) => x.id == imdb_id);
+
+  const sources = await arrangeSources(json.sources);
+  const subtitles = await arrangeSubtitles(json.subtitles);
+
+  const player = definePlayer({
+    video_id: "video_1",
+    sources: sources,
+    subtitles: subtitles,
+  });
+
+  console.log(sources);
+
+  // scroll to the end of the page
+  window.scrollTo({
+    left: 0,
+    top: document.body.scrollHeight,
+    behavior: "smooth",
+  });
+
+  continueWatching(player);
+  saveTimestamp(player);
+}
+
+async function getJson(url) {
+  const watchLink = await fetch(url);
+  return await watchLink.json();
+}
+
+async function arrangeSources(sources) {
+  let arrangedSources = [];
+  for (let i = 0; i < sources.length; i++) {
+    let source = sources[i];
+    arrangedSources.push({
       src: source.url,
       label: source.quality,
       type: "application/x-mpegURL",
@@ -589,22 +635,28 @@ async function display_video(episodeId, mediaId) {
         <button onClick="navigator.clipboard.writeText('${source.url}')">${source.quality}</button>
     `;
   }
+  return arrangedSources;
+}
 
-  const subtitles = await get_sub(imdb_id);
+async function arrangeSubtitles(subtitles) {
+  const arrangedSubtitles = await get_sub(imdb_id);
 
   let languages = ["English", `${subLang}`];
-  const filtered = json.subtitles.filter((x) => {
+  const filtered = subtitles.filter((x) => {
     return languages.find((y) => x.lang.startsWith(y));
   });
+
   for (let i = 0; i < filtered.length; i++) {
-    subtitles.push({
+    arrangedSubtitles.push({
       src: filtered[i].url,
       kind: "captions",
       label: filtered[i].lang,
     });
   }
+  return arrangedSubtitles;
+}
 
-  console.log(sources);
+function definePlayer({ video_id, sources, subtitles }) {
   let options = {
     playbackRates: [0.5, 1, 1.5, 2],
     controlBar: {
@@ -633,7 +685,7 @@ async function display_video(episodeId, mediaId) {
     tracks: subtitles,
   };
 
-  const video_el = document.getElementById("video_1");
+  const video_el = document.getElementById(video_id);
   const player = videojs(video_el, options);
 
   // player settings and plugins
@@ -650,13 +702,6 @@ async function display_video(episodeId, mediaId) {
       tapTimeout: 300,
       disableOnEnd: false,
     },
-  });
-
-  // scroll to the end of the page
-  window.scrollTo({
-    left: 0,
-    top: document.body.scrollHeight,
-    behavior: "smooth",
   });
 
   // Makes progress bar draggable.
@@ -677,10 +722,13 @@ async function display_video(episodeId, mediaId) {
     this.update();
   };
 
+  return player;
+}
+
+function continueWatching(player) {
   // save previous timestamp data.
   const episode_select = document.getElementById("episodes-selector");
   let previousEpisode;
-  let index = history.findIndex((x) => x.id == imdb_id);
 
   if (history[index]) {
     if (history[index].episode) {
@@ -709,7 +757,9 @@ async function display_video(episodeId, mediaId) {
       player.currentTime(timestamp);
     }
   }
+}
 
+function saveTimestamp(player) {
   // save the timestamp through DB polling (every 20s)
   setInterval(() => {
     const previousTimestamp = history[index].timestamp
