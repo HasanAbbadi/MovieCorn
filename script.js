@@ -17,7 +17,7 @@ const langSelector = document.getElementById("language-selector");
 
 // The apis I'll be using
 const omdb_api = "https://omdbapi.com";
-const consumetapi = "https://c.delusionz.xyz/movies/flixhq";
+const consumetapi = "https://api.haikei.xyz/movies/flixhq";
 const mysubsApi = "https://mysubs-api.vercel.app";
 
 // multiple api keys to avoid hitting the daily limit of 3000
